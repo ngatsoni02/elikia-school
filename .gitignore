@@ -1,0 +1,8 @@
+node_modules/
+dist/
+release/
+*.exe
+*.AppImage
+*.dmg
+.env
+.env.local

@@ -1,0 +1,91 @@
+{
+  "name": "elikia-school",
+  "version": "2.0.0",
+  "description": "Application de gestion scolaire complete pour ELIKIA-SCHOOL - Eleves, Professeurs, Finances, Emploi du temps.",
+  "main": "src/main/main.js",
+  "scripts": {
+    "dev": "concurrently \"npm run dev:css\" \"npm run dev:js\"",
+    "dev:js": "esbuild src/renderer/index.tsx --bundle --outfile=dist/bundle.js --platform=browser --target=es2020 --jsx=automatic --sourcemap --watch",
+    "dev:css": "tailwindcss -i src/renderer/styles.css -o dist/styles.css --watch",
+    "build:js": "esbuild src/renderer/index.tsx --bundle --outfile=dist/bundle.js --platform=browser --target=es2020 --jsx=automatic --minify",
+    "build:css": "tailwindcss -i src/renderer/styles.css -o dist/styles.css --minify",
+    "build:assets": "npm run build:js && npm run build:css",
+    "start": "npm run build:assets && electron .",
+    "dist": "npm run build:assets && electron-builder",
+    "dist:win": "npm run build:assets && electron-builder --win",
+    "dist:mac": "npm run build:assets && electron-builder --mac",
+    "dist:linux": "npm run build:assets && electron-builder --linux"
+  },
+  "keywords": [
+    "school",
+    "management",
+    "education",
+    "electron"
+  ],
+  "author": "ELIKIA-SCHOOL",
+  "license": "MIT",
+  "dependencies": {
+    "better-sqlite3": "^11.7.0",
+    "html2canvas": "^1.4.1",
+    "jspdf": "^4.2.1",
+    "jspdf-autotable": "^5.0.7",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1",
+    "recharts": "^3.1.2"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2",
+    "electron": "^31.2.1",
+    "electron-builder": "^24.13.3",
+    "esbuild": "^0.23.0",
+    "tailwindcss": "^3.4.17"
+  },
+  "build": {
+    "appId": "com.elikiaschool.app",
+    "productName": "ELIKIA School Management",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "index.html",
+      "dist/**/*",
+      "src/main/**/*",
+      "assets/**/*",
+      "node_modules/better-sqlite3/**/*"
+    ],
+    "extraResources": [],
+    "asar": true,
+    "asarUnpack": [
+      "node_modules/better-sqlite3/**/*"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": ["x64"]
+        }
+      ],
+      "icon": "assets/icon.ico",
+      "signAndEditExecutable": false
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "installerIcon": "assets/icon.ico",
+      "uninstallerIcon": "assets/icon.ico",
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "ELIKIA School"
+    },
+    "linux": {
+      "target": ["AppImage"],
+      "icon": "assets/icon.png",
+      "category": "Education"
+    },
+    "mac": {
+      "target": ["dmg"],
+      "icon": "assets/icon.png",
+      "category": "public.app-category.education"
+    }
+  }
+}
