@@ -1,6 +1,6 @@
 import jsPDF from 'jspdf';
 import autoTable, { type CellDef } from 'jspdf-autotable';
-import { AppSettings, Student, Classe } from '../types';
+import { AppSettings, Student, Classe, Teacher, Staff, SalaryPayment } from '../types';
 import { formatCurrency, formatDate } from './formatters';
 import { getSchoolYear } from './schoolYear';
 
@@ -1268,4 +1268,326 @@ export function generateOverdueReport(
     },
     comments,
   });
+}
+
+// =============================================
+// Bulletin de Paye (Fiche de Salaire)
+// =============================================
+export function generatePaySlipPdf(
+  employee: Teacher | Staff,
+  salaryPayment: SalaryPayment,
+  allSalaryPayments: SalaryPayment[],
+  settings: AppSettings,
+) {
+  const doc = new jsPDF('portrait', 'mm', 'a4');
+  const pw = doc.internal.pageSize.getWidth();
+  const margin = 14;
+  const contentWidth = pw - margin * 2;
+
+  const isTeacher = 'matiere' in employee;
+  const employeeRole = isTeacher ? `Professeur - ${(employee as Teacher).matiere}` : (employee as Staff).role;
+  const employeeName = `${employee.prenom} ${employee.nom.toUpperCase()}`;
+  const payMonth = new Date(salaryPayment.month + '-02').toLocaleString('fr-FR', { month: 'long', year: 'numeric' });
+  const payDate = formatDate(salaryPayment.date);
+  const schoolYear = getSchoolYear();
+
+  // Paiements de l'annee pour cet employe
+  const yearPayments = allSalaryPayments
+    .filter(p => p.employee_id === employee.id)
+    .sort((a, b) => a.month.localeCompare(b.month));
+  const totalYearPaid = yearPayments.reduce((sum, p) => sum + p.amount, 0);
+  const monthsPaid = yearPayments.length;
+
+  // ======= EN-TETE DE L'ECOLE =======
+  doc.setFillColor(...C.primary);
+  doc.rect(0, 0, pw, 3, 'F');
+
+  doc.setFillColor(...C.dark);
+  doc.rect(0, 3, pw, 36, 'F');
+  doc.setFillColor(...C.primary);
+  doc.rect(0, 3, pw / 2, 36, 'F');
+
+  let textX = margin;
+  const logoSrc = settings.receipt_logo_path || settings.logo_path;
+  if (logoSrc && logoSrc.startsWith('data:image')) {
+    try {
+      doc.addImage(logoSrc, 'AUTO', 10, 6, 30, 30);
+      textX = 44;
+    } catch { /* ignore */ }
+  }
+
+  doc.setTextColor(...C.white);
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(16);
+  doc.text(settings.ecole_nom.toUpperCase(), textX, 18);
+
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(8);
+  const info = [settings.adresse_ecole, `Tel: ${settings.telephone_ecole}`, settings.email_ecole].filter(Boolean).join(' | ');
+  doc.text(info, textX, 25);
+  if (settings.slogan_ecole) {
+    doc.setFont('helvetica', 'italic');
+    doc.setFontSize(7);
+    doc.text(settings.slogan_ecole, textX, 31);
+  }
+
+  // Titre du document
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(12);
+  doc.text('BULLETIN DE PAYE', pw - margin, 16, { align: 'right' });
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(8);
+  doc.text(`Annee scolaire ${schoolYear}`, pw - margin, 23, { align: 'right' });
+  doc.setFontSize(7);
+  doc.text(`Ref: ${salaryPayment.id}`, pw - margin, 29, { align: 'right' });
+
+  doc.setFillColor(...C.accent);
+  doc.rect(0, 39, pw, 2, 'F');
+
+  let y = 48;
+
+  // ======= TITRE CENTRAL =======
+  doc.setFillColor(...C.lightBg);
+  doc.roundedRect(margin, y, contentWidth, 12, 2, 2, 'F');
+  doc.setDrawColor(...C.primary);
+  doc.setLineWidth(0.5);
+  doc.roundedRect(margin, y, contentWidth, 12, 2, 2, 'S');
+  doc.setTextColor(...C.dark);
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(11);
+  doc.text(`BULLETIN DE PAYE - ${payMonth.toUpperCase()}`, pw / 2, y + 7.5, { align: 'center' });
+  y += 18;
+
+  // ======= INFORMATIONS EMPLOYE =======
+  doc.setFillColor(...C.dark);
+  doc.roundedRect(margin, y, contentWidth, 8, 1.5, 1.5, 'F');
+  doc.setTextColor(...C.white);
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(9);
+  doc.text('INFORMATIONS DE L\'EMPLOYE', margin + 4, y + 5.5);
+  y += 12;
+
+  const drawInfoRow = (label: string, value: string, xOffset: number, rowY: number) => {
+    doc.setTextColor(...C.muted);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(8);
+    doc.text(label, xOffset, rowY);
+    doc.setTextColor(...C.text);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(9);
+    doc.text(value, xOffset + 38, rowY);
+  };
+
+  const col1 = margin + 4;
+  const col2 = pw / 2 + 4;
+
+  drawInfoRow('Matricule :', employee.id, col1, y);
+  drawInfoRow('Telephone :', employee.telephone || '-', col2, y);
+  y += 7;
+  drawInfoRow('Nom complet :', employeeName, col1, y);
+  drawInfoRow('Email :', employee.email || '-', col2, y);
+  y += 7;
+  drawInfoRow('Fonction :', employeeRole, col1, y);
+  drawInfoRow('Date embauche :', formatDate(employee.embauche), col2, y);
+  y += 7;
+  drawInfoRow('Salaire base :', formatCurrency(employee.salaire_mensuel), col1, y);
+  drawInfoRow('Date paiement :', payDate, col2, y);
+  y += 12;
+
+  // ======= DETAILS DU PAIEMENT =======
+  doc.setFillColor(...C.dark);
+  doc.roundedRect(margin, y, contentWidth, 8, 1.5, 1.5, 'F');
+  doc.setTextColor(...C.white);
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(9);
+  doc.text('DETAIL DU PAIEMENT', margin + 4, y + 5.5);
+  y += 12;
+
+  // Tableau des details
+  autoTable(doc, {
+    startY: y,
+    margin: { left: margin, right: margin },
+    head: [['Designation', 'Base', 'Montant']],
+    body: [
+      ['Salaire de base mensuel', formatCurrency(employee.salaire_mensuel), formatCurrency(employee.salaire_mensuel)],
+      ['Ajustement / Prime', '-', salaryPayment.amount !== employee.salaire_mensuel ? formatCurrency(salaryPayment.amount - employee.salaire_mensuel) : '-'],
+    ],
+    foot: [['', 'NET A PAYER', formatCurrency(salaryPayment.amount)]],
+    theme: 'grid',
+    headStyles: { fillColor: C.primary, textColor: C.white, fontStyle: 'bold', fontSize: 9, halign: 'center' },
+    bodyStyles: { fontSize: 9, textColor: C.text },
+    footStyles: { fillColor: C.lightBg, textColor: C.dark, fontStyle: 'bold', fontSize: 10, halign: 'right' },
+    columnStyles: {
+      0: { halign: 'left', cellWidth: contentWidth * 0.5 },
+      1: { halign: 'right', cellWidth: contentWidth * 0.25 },
+      2: { halign: 'right', cellWidth: contentWidth * 0.25 },
+    },
+    alternateRowStyles: { fillColor: C.altRow },
+  });
+
+  y = (doc as any).lastAutoTable.finalY + 10;
+
+  // ======= MONTANT EN LETTRES =======
+  doc.setFillColor(...C.successBg);
+  doc.setDrawColor(...C.accent);
+  doc.setLineWidth(0.5);
+  doc.roundedRect(margin, y, contentWidth, 14, 2, 2, 'FD');
+  doc.setTextColor(...C.successTx);
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(8);
+  doc.text('Arrete le present bulletin a la somme de :', margin + 4, y + 5);
+  doc.setFontSize(10);
+
+  // numberToWordsFr inline import
+  const amountWords = (() => {
+    try {
+      const n = salaryPayment.amount;
+      if (n === 0) return 'Zero';
+      const units = ['', 'un', 'deux', 'trois', 'quatre', 'cinq', 'six', 'sept', 'huit', 'neuf'];
+      const teens = ['dix', 'onze', 'douze', 'treize', 'quatorze', 'quinze', 'seize', 'dix-sept', 'dix-huit', 'dix-neuf'];
+      const tensArr = ['', 'dix', 'vingt', 'trente', 'quarante', 'cinquante', 'soixante', 'soixante-dix', 'quatre-vingt', 'quatre-vingt-dix'];
+      const convert = (num: number): string => {
+        if (num < 10) return units[num];
+        if (num < 20) return teens[num - 10];
+        if (num < 100) {
+          const ten = Math.floor(num / 10);
+          const unit = num % 10;
+          if (ten === 7 || ten === 9) { const nu = num - (ten - 1) * 10; return tensArr[ten - 1] + (nu - 10 === 1 ? ' et ' : '-') + teens[nu - 10]; }
+          if (unit === 1 && ten < 8 && ten > 1) return tensArr[ten] + ' et un';
+          return tensArr[ten] + (unit ? '-' + units[unit] : '');
+        }
+        if (num < 1000) { const h = Math.floor(num / 100); const r = num % 100; return (h > 1 ? units[h] + ' cent' : 'cent') + (r ? ' ' + convert(r) : h > 1 ? 's' : ''); }
+        if (num < 1000000) { const t = Math.floor(num / 1000); const r = num % 1000; return (t > 1 ? convert(t) + ' mille' : 'mille') + (r ? ' ' + convert(r) : ''); }
+        return String(num);
+      };
+      let result = convert(n);
+      return result.charAt(0).toUpperCase() + result.slice(1) + ' francs CFA';
+    } catch { return formatCurrency(salaryPayment.amount); }
+  })();
+
+  doc.text(amountWords, margin + 4, y + 11);
+  y += 20;
+
+  // ======= HISTORIQUE DES PAIEMENTS DE L'ANNEE =======
+  doc.setFillColor(...C.dark);
+  doc.roundedRect(margin, y, contentWidth, 8, 1.5, 1.5, 'F');
+  doc.setTextColor(...C.white);
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(9);
+  doc.text('HISTORIQUE DES PAIEMENTS - ANNEE SCOLAIRE', margin + 4, y + 5.5);
+  y += 12;
+
+  const historyRows = yearPayments.map((p, idx) => [
+    String(idx + 1),
+    new Date(p.month + '-02').toLocaleString('fr-FR', { month: 'long', year: 'numeric' }),
+    formatDate(p.date),
+    formatCurrency(p.amount),
+    p.id === salaryPayment.id ? '<<< CE MOIS' : '',
+  ]);
+
+  autoTable(doc, {
+    startY: y,
+    margin: { left: margin, right: margin },
+    head: [['No', 'Periode', 'Date paiement', 'Montant', '']],
+    body: historyRows,
+    foot: [[
+      '', `${monthsPaid} mois paye(s) sur 10`, '', formatCurrency(totalYearPaid), '',
+    ]],
+    theme: 'grid',
+    headStyles: { fillColor: C.primary, textColor: C.white, fontStyle: 'bold', fontSize: 8, halign: 'center' },
+    bodyStyles: { fontSize: 8, textColor: C.text },
+    footStyles: { fillColor: C.totalBg, textColor: C.dark, fontStyle: 'bold', fontSize: 8 },
+    columnStyles: {
+      0: { halign: 'center', cellWidth: 12 },
+      1: { halign: 'left' },
+      2: { halign: 'center' },
+      3: { halign: 'right' },
+      4: { halign: 'center', fontStyle: 'bold', textColor: C.primary },
+    },
+    alternateRowStyles: { fillColor: C.altRow },
+    didParseCell: (data: any) => {
+      if (data.section === 'body' && data.row.raw && data.row.raw[4] === '<<< CE MOIS') {
+        data.cell.styles.fillColor = [219, 234, 254];
+        data.cell.styles.fontStyle = 'bold';
+      }
+    },
+  });
+
+  y = (doc as any).lastAutoTable.finalY + 12;
+
+  // ======= RECAPITULATIF =======
+  const remaining = (employee.salaire_mensuel * 10) - totalYearPaid;
+  const pct = Math.round(totalYearPaid / (employee.salaire_mensuel * 10) * 100);
+
+  doc.setFillColor(...C.lightBg);
+  doc.roundedRect(margin, y, contentWidth, 18, 2, 2, 'F');
+  doc.setDrawColor(...C.border);
+  doc.roundedRect(margin, y, contentWidth, 18, 2, 2, 'S');
+
+  doc.setTextColor(...C.text);
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(8);
+
+  const col3 = pw * 2 / 3 + 4;
+  doc.text(`Salaire annuel (10 mois) : ${formatCurrency(employee.salaire_mensuel * 10)}`, col1, y + 6);
+  doc.text(`Total verse : ${formatCurrency(totalYearPaid)}`, col2, y + 6);
+  doc.text(`Reste a verser : ${formatCurrency(Math.max(0, remaining))}`, col3, y + 6);
+
+  // Barre de progression
+  const barX = col1;
+  const barW = contentWidth - 8;
+  const barY = y + 10;
+  const barH = 4;
+  doc.setFillColor(...C.border);
+  doc.roundedRect(barX, barY, barW, barH, 1.5, 1.5, 'F');
+  doc.setFillColor(...(pct >= 80 ? C.accent : pct >= 50 ? [234, 179, 8] as [number, number, number] : C.dangerTx));
+  doc.roundedRect(barX, barY, barW * Math.min(pct, 100) / 100, barH, 1.5, 1.5, 'F');
+  doc.setTextColor(...C.text);
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(7);
+  doc.text(`${pct}%`, barX + barW / 2, barY + 3.2, { align: 'center' });
+
+  y += 26;
+
+  // ======= SIGNATURES =======
+  doc.setDrawColor(...C.border);
+  doc.setLineWidth(0.3);
+  doc.line(margin, y, margin + contentWidth, y);
+  y += 8;
+
+  doc.setTextColor(...C.muted);
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(8);
+  doc.text('Signature de l\'employe', margin + 20, y, { align: 'center' });
+  doc.text('Cachet et signature de la Direction', pw - margin - 30, y, { align: 'center' });
+
+  // Lignes de signature
+  y += 18;
+  doc.setDrawColor(...C.border);
+  doc.line(margin + 4, y, margin + 60, y);
+  doc.line(pw - margin - 60, y, pw - margin - 4, y);
+
+  // Cachet si disponible
+  if (settings.receipt_stamp_path && settings.receipt_stamp_path.startsWith('data:image')) {
+    try {
+      doc.addImage(settings.receipt_stamp_path, 'AUTO', pw - margin - 50, y - 28, 25, 25);
+    } catch { /* ignore */ }
+  }
+
+  // ======= PIED DE PAGE =======
+  const ph = doc.internal.pageSize.getHeight();
+  doc.setDrawColor(...C.border);
+  doc.setLineWidth(0.3);
+  doc.line(margin, ph - 16, pw - margin, ph - 16);
+  doc.setTextColor(...C.muted);
+  doc.setFontSize(6.5);
+  doc.setFont('helvetica', 'normal');
+  doc.text(`${settings.ecole_nom} - Bulletin de paye confidentiel`, margin, ph - 10);
+  doc.text(`Edite le ${new Date().toLocaleDateString('fr-FR')}`, pw / 2, ph - 10, { align: 'center' });
+  doc.setFont('helvetica', 'bold');
+  doc.text(`Ref: ${salaryPayment.id}`, pw - margin, ph - 10, { align: 'right' });
+
+  // Sauvegarder
+  const sanitizedName = `${employee.prenom}_${employee.nom}`.replace(/[^a-zA-Z0-9_-]/g, '_');
+  doc.save(`Bulletin_Paye_${sanitizedName}_${salaryPayment.month}.pdf`);
 }

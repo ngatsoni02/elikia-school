@@ -11,6 +11,7 @@ import { formatCurrency, formatDate, formatMonth } from '../utils/formatters';
 import { getSchoolYear, getMonthsForSchoolYear, getOverdueStatus } from '../utils/schoolYear';
 import { numberToWordsFr } from '../utils/numberToWords';
 import { getPhotoOrAvatar } from '../utils/avatar';
+import { generatePaySlipPdf } from '../utils/pdfGenerator';
 
 // =============================================
 // Composant Recu Modernise
@@ -675,6 +676,7 @@ const SalaryPaymentForm = ({
 // =============================================
 const SalaryManager = ({ state, updateState }: { state: AppState; updateState: (updater: (prevState: AppState) => AppState) => void }) => {
   const [paymentModal, setPaymentModal] = useState<{ employee: Teacher | Staff; month: string } | null>(null);
+  const { toast } = useToast();
   const employees = useMemo(() => [...state.teachers, ...state.staff], [state.teachers, state.staff]);
 
   const schoolYear = getSchoolYear(new Date(), state.settings.school_year_override);
@@ -696,6 +698,16 @@ const SalaryManager = ({ state, updateState }: { state: AppState; updateState: (
       };
     });
     setPaymentModal(null);
+    toast('Salaire enregistre avec succes', 'success');
+  };
+
+  const handleDownloadPaySlip = (employee: Teacher | Staff, payment: SalaryPayment) => {
+    try {
+      generatePaySlipPdf(employee, payment, state.salaryPayments, state.settings);
+      toast('Bulletin de paye telecharge', 'success');
+    } catch {
+      toast('Erreur lors de la generation du bulletin', 'error');
+    }
   };
 
   return (
@@ -727,9 +739,14 @@ const SalaryManager = ({ state, updateState }: { state: AppState; updateState: (
                   return (
                     <td key={month} className="p-3 text-center">
                       {payment ? (
-                        <div className="bg-brand-success/20 text-brand-success px-2 py-1 rounded text-xs font-semibold inline-block">
+                        <button
+                          onClick={() => handleDownloadPaySlip(employee, payment)}
+                          className="bg-brand-success/20 text-brand-success px-2 py-1 rounded text-xs font-semibold inline-flex items-center gap-1 hover:bg-brand-success/30 transition-colors"
+                          title="Cliquez pour telecharger le bulletin de paye"
+                        >
+                          <FileDownIcon className="w-3 h-3" />
                           {formatCurrency(payment.amount)}
-                        </div>
+                        </button>
                       ) : (
                         <Button variant="secondary" size="sm" className="text-xs px-2 py-1" onClick={() => setPaymentModal({ employee, month })}>
                           Payer

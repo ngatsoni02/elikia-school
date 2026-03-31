@@ -117,6 +117,7 @@ const App = () => {
         currentUser={state.currentUser}
         onLogout={handleLogout}
         onSearchOpen={() => setSearchOpen(true)}
+        settings={state.settings}
       />
       <main className="flex-1 overflow-x-hidden">
         <PageRouter activePage={activePage} state={state} updateState={updateState} />

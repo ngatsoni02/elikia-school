@@ -1,5 +1,5 @@
 import React from 'react';
-import { User, PageName } from '../types';
+import { User, PageName, AppSettings } from '../types';
 import { Button } from './ui';
 import {
   HomeIcon, UsersIcon, BookUserIcon, ClipboardUserIcon, SchoolIcon,
@@ -32,17 +32,25 @@ export const Sidebar = ({
   currentUser,
   onLogout,
   onSearchOpen,
+  settings,
 }: {
   activePage: PageName;
   onNavigate: (page: PageName) => void;
   currentUser: User;
   onLogout: () => void;
   onSearchOpen?: () => void;
+  settings?: AppSettings;
 }) => (
   <div className="bg-brand-bg-dark w-64 p-4 flex flex-col h-screen text-brand-text-secondary sticky top-0">
     <div className="flex items-center mb-4">
-      <SchoolIcon className="w-8 h-8 text-brand-primary" />
-      <h1 className="text-xl font-bold text-brand-text ml-2">ELIKIA-SCHOOL</h1>
+      {settings?.logo_path ? (
+        <img src={settings.logo_path} alt="Logo" className="w-9 h-9 rounded-lg object-cover flex-shrink-0" />
+      ) : (
+        <SchoolIcon className="w-8 h-8 text-brand-primary flex-shrink-0" />
+      )}
+      <h1 className="text-lg font-bold text-brand-text ml-2 leading-tight truncate">
+        {settings?.ecole_nom || 'ELIKIA-SCHOOL'}
+      </h1>
     </div>
 
     {/* Search bar */}
