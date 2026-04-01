@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { AppState } from '../types';
 import { initialData } from '../data';
 
-const STORAGE_KEY = 'elikia-school-state';
+const STORAGE_KEY = 'isb-coserco-state';
 
 export const useAppState = () => {
   const [state, setState] = useState<AppState>(() => {

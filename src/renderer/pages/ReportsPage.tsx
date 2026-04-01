@@ -42,21 +42,21 @@ export const ReportsPage = ({ state }: { state: AppState }) => {
   const reports: ReportCard[] = [
     {
       id: 'students',
-      title: 'Releve des Eleves',
-      description: 'Liste complete des eleves avec statut de paiement et solde restant.',
+      title: 'Releve des Etudiants',
+      description: 'Liste complete des etudiants avec statut de paiement et solde restant.',
       icon: UsersIcon,
       color: 'from-blue-500 to-blue-700',
       stat: String(state.students.length),
-      statLabel: 'eleves inscrits',
+      statLabel: 'etudiants inscrits',
     },
     {
       id: 'teachers',
-      title: 'Releve des Professeurs',
-      description: 'Liste des professeurs, matieres et salaires verses.',
+      title: 'Releve des Enseignants',
+      description: 'Liste des enseignants, matieres et salaires verses.',
       icon: BookUserIcon,
       color: 'from-emerald-500 to-emerald-700',
       stat: String(state.teachers.length),
-      statLabel: 'professeurs',
+      statLabel: 'enseignants',
     },
     {
       id: 'staff',
@@ -142,7 +142,7 @@ export const ReportsPage = ({ state }: { state: AppState }) => {
       <Card>
         <h2 className="font-semibold mb-3">Filtres (optionnels)</h2>
         <div className="flex flex-wrap gap-4">
-          <Select label="Filtrer les eleves par classe" value={filterClasse} onChange={(e) => setFilterClasse(e.target.value)} className="max-w-xs">
+          <Select label="Filtrer les etudiants par classe" value={filterClasse} onChange={(e) => setFilterClasse(e.target.value)} className="max-w-xs">
             <option value="">Toutes les classes</option>
             {state.classes.map(c => <option key={c.id} value={c.nom}>{c.nom}</option>)}
           </Select>
@@ -196,7 +196,7 @@ export const ReportsPage = ({ state }: { state: AppState }) => {
 
       {/* Note */}
       <div className="text-xs text-brand-text-secondary text-center pt-2">
-        Les releves sont generes avec les donnees actuelles. Le logo et le cachet de l'ecole (configures dans Parametres) apparaissent automatiquement.
+        Les releves sont generes avec les donnees actuelles. Le logo et le cachet de l'institut (configures dans Parametres) apparaissent automatiquement.
       </div>
     </div>
   );

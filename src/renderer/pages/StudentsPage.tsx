@@ -9,7 +9,7 @@ import { getPhotoOrAvatar } from '../utils/avatar';
 import { generateStudentListPdf, generateStudentCardPdf } from '../utils/pdfGenerator';
 
 // =============================================
-// Formulaire Eleve
+// Formulaire Etudiant
 // =============================================
 const StudentForm = ({
   item,
@@ -27,7 +27,8 @@ const StudentForm = ({
       ? { ...item }
       : {
           nom: '', prenom: '', genre: 'Masculin', date_naissance: '', lieu_naissance: '',
-          adresse: '', nom_tuteur: '', telephone: '', email: '', classe: '', photo_path: '',
+          adresse: '', eglise_locale: '', pasteur_recommandant: '', telephone: '', email: '',
+          classe: '', annee_etude: '1ere Annee' as const, niveau_admission: '', date_bapteme: '', photo_path: '',
         },
   );
 
@@ -70,16 +71,28 @@ const StudentForm = ({
         </Select>
       </FormRow>
       <FormRow>
+        <Select label="Annee d'etude" name="annee_etude" value={formData.annee_etude} onChange={handleChange} required>
+          <option value="1ere Annee">1ere Annee</option>
+          <option value="2eme Annee">2eme Annee</option>
+          <option value="3eme Annee">3eme Annee</option>
+        </Select>
+        <Input label="Niveau d'admission" name="niveau_admission" value={formData.niveau_admission} onChange={handleChange} placeholder="BEPC, Baccalaureat..." />
+      </FormRow>
+      <FormRow>
         <Input label="Date de naissance" name="date_naissance" type="date" value={formData.date_naissance} onChange={handleChange} required />
-        <Input label="Lieu de naissance" name="lieu_naissance" value={formData.lieu_naissance} onChange={handleChange} />
+        <Input label="Date de bapteme" name="date_bapteme" type="date" value={formData.date_bapteme} onChange={handleChange} />
       </FormRow>
       <FormRow>
-        <Input label="Nom du tuteur" name="nom_tuteur" value={formData.nom_tuteur} onChange={handleChange} required />
-        <Input label="Telephone du tuteur" name="telephone" value={formData.telephone} onChange={handleChange} required />
+        <Input label="Eglise locale" name="eglise_locale" value={formData.eglise_locale} onChange={handleChange} required placeholder="Nom de l'eglise d'envoi" />
+        <Input label="Pasteur recommandant" name="pasteur_recommandant" value={formData.pasteur_recommandant} onChange={handleChange} required />
       </FormRow>
       <FormRow>
-        <Input label="Adresse" name="adresse" value={formData.adresse} onChange={handleChange} />
+        <Input label="Telephone" name="telephone" value={formData.telephone} onChange={handleChange} required />
         <Input label="Email" name="email" type="email" value={formData.email} onChange={handleChange} />
+      </FormRow>
+      <FormRow>
+        <Input label="Lieu de naissance" name="lieu_naissance" value={formData.lieu_naissance} onChange={handleChange} />
+        <Input label="Adresse" name="adresse" value={formData.adresse} onChange={handleChange} />
       </FormRow>
       <div className="flex justify-end space-x-2 mt-6">
         <Button type="button" variant="secondary" onClick={onCancel}>Annuler</Button>
@@ -135,7 +148,7 @@ const TransferModal = ({
               <th className="p-2 text-center w-10">
                 <input type="checkbox" checked={selectedIds.size === students.length && students.length > 0} onChange={toggleAll} className="rounded" />
               </th>
-              <th className="p-2 text-left">Eleve</th>
+              <th className="p-2 text-left">Etudiant</th>
               <th className="p-2 text-left">Classe actuelle</th>
             </tr>
           </thead>
@@ -153,7 +166,7 @@ const TransferModal = ({
         </table>
       </div>
       <div className="flex justify-between items-center">
-        <span className="text-sm text-brand-text-secondary">{selectedIds.size} eleve(s) selectionne(s)</span>
+        <span className="text-sm text-brand-text-secondary">{selectedIds.size} etudiant(s) selectionne(s)</span>
         <div className="flex gap-2">
           <Button variant="secondary" onClick={onClose}>Annuler</Button>
           <Button
@@ -169,7 +182,7 @@ const TransferModal = ({
 };
 
 // =============================================
-// Page Eleves
+// Page Etudiants
 // =============================================
 const ITEMS_PER_PAGE = 25;
 
@@ -193,7 +206,7 @@ export const StudentsPage = ({
 
   const schoolYear = getSchoolYear(new Date(), state.settings.school_year_override);
 
-  // Calcul du statut de paiement par eleve
+  // Calcul du statut de paiement par etudiant
   const paymentStatus = useMemo(() => {
     const months = getMonthsForSchoolYear(schoolYear);
     const today = new Date();
@@ -228,7 +241,7 @@ export const StudentsPage = ({
       result = result.filter((s) =>
         `${s.prenom} ${s.nom}`.toLowerCase().includes(q) ||
         s.id.toLowerCase().includes(q) ||
-        s.nom_tuteur.toLowerCase().includes(q) ||
+        s.eglise_locale.toLowerCase().includes(q) ||
         s.telephone.includes(q),
       );
     }
@@ -268,20 +281,20 @@ export const StudentsPage = ({
     });
     setIsModalOpen(false);
     setEditingStudent(null);
-    toast(isNew ? 'Eleve ajoute avec succes' : 'Eleve modifie avec succes', 'success');
+    toast(isNew ? 'Etudiant ajoute avec succes' : 'Etudiant modifie avec succes', 'success');
   };
 
   const handleDelete = async (id: string) => {
     const student = state.students.find((s) => s.id === id);
     const ok = await confirm({
-      title: 'Supprimer cet eleve ?',
+      title: 'Supprimer cet etudiant ?',
       message: `Etes-vous sur de vouloir supprimer ${student?.prenom} ${student?.nom?.toUpperCase()} ? Cette action est irreversible.`,
       confirmLabel: 'Supprimer',
       variant: 'danger',
     });
     if (ok) {
       updateState((prev) => ({ ...prev, students: prev.students.filter((s) => s.id !== id) }));
-      toast('Eleve supprime', 'warning');
+      toast('Etudiant supprime', 'warning');
     }
   };
 
@@ -290,7 +303,7 @@ export const StudentsPage = ({
       ...prev,
       students: prev.students.map((s) => (studentIds.includes(s.id) ? { ...s, classe: newClasse } : s)),
     }));
-    toast(`${studentIds.length} eleve(s) transfere(s) vers ${newClasse}`, 'success');
+    toast(`${studentIds.length} etudiant(s) transfere(s) vers ${newClasse}`, 'success');
   };
 
   const handleDownloadList = () => {
@@ -316,8 +329,8 @@ export const StudentsPage = ({
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Eleves</h1>
-          <p className="text-sm text-brand-text-secondary mt-1">Gestion des inscriptions et des listes d'eleves</p>
+          <h1 className="text-3xl font-bold">Etudiants</h1>
+          <p className="text-sm text-brand-text-secondary mt-1">Gestion des inscriptions et des listes des etudiants</p>
         </div>
         <div className="flex gap-2">
           <Button variant="secondary" onClick={() => setTransferOpen(true)}>
@@ -340,11 +353,11 @@ export const StudentsPage = ({
         </Card>
         <Card className="text-center py-3">
           <div className="text-2xl font-black text-blue-400">{stats.garcons}</div>
-          <div className="text-xs text-brand-text-secondary font-semibold">Garcons</div>
+          <div className="text-xs text-brand-text-secondary font-semibold">Hommes</div>
         </Card>
         <Card className="text-center py-3">
           <div className="text-2xl font-black text-pink-400">{stats.filles}</div>
-          <div className="text-xs text-brand-text-secondary font-semibold">Filles</div>
+          <div className="text-xs text-brand-text-secondary font-semibold">Femmes</div>
         </Card>
         <Card className="text-center py-3">
           <div className="text-2xl font-black text-emerald-400">{stats.ok}</div>
@@ -364,7 +377,7 @@ export const StudentsPage = ({
       <div className="flex flex-wrap gap-3">
         <Input
           type="text"
-          placeholder="Rechercher nom, matricule, tuteur, telephone..."
+          placeholder="Rechercher nom, matricule, eglise, telephone..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           className="max-w-xs"
@@ -377,8 +390,8 @@ export const StudentsPage = ({
         </Select>
         <Select value={filterGender} onChange={(e) => setFilterGender(e.target.value)} className="max-w-[160px]">
           <option value="">Tous les genres</option>
-          <option value="Masculin">Garcons</option>
-          <option value="Féminin">Filles</option>
+          <option value="Masculin">Hommes</option>
+          <option value="Féminin">Femmes</option>
         </Select>
         <Select value={filterPayment} onChange={(e) => setFilterPayment(e.target.value)} className="max-w-[180px]">
           <option value="">Tous les statuts</option>
@@ -403,7 +416,7 @@ export const StudentsPage = ({
               <th className="p-3">Classe</th>
               <th className="p-3 text-center">Genre</th>
               <th className="p-3 text-center">Paiement</th>
-              <th className="p-3">Tuteur</th>
+              <th className="p-3">Eglise</th>
               <th className="p-3">Telephone</th>
               <th className="p-3 text-right">Actions</th>
             </tr>
@@ -412,7 +425,7 @@ export const StudentsPage = ({
             {paginatedStudents.length === 0 ? (
               <tr>
                 <td colSpan={8} className="p-8 text-center text-brand-text-secondary">
-                  {state.students.length === 0 ? "Aucun eleve inscrit. Cliquez sur 'Inscrire' pour commencer." : 'Aucun resultat pour ces filtres.'}
+                  {state.students.length === 0 ? "Aucun etudiant inscrit. Cliquez sur 'Inscrire' pour commencer." : 'Aucun resultat pour ces filtres.'}
                 </td>
               </tr>
             ) : (
@@ -438,7 +451,7 @@ export const StudentsPage = ({
                     </span>
                   </td>
                   <td className="p-3 text-center">{statusBadge(s.id)}</td>
-                  <td className="p-3">{s.nom_tuteur}</td>
+                  <td className="p-3">{s.eglise_locale}</td>
                   <td className="p-3">{s.telephone}</td>
                   <td className="p-3">
                     <div className="flex items-center justify-end gap-1">
@@ -476,7 +489,7 @@ export const StudentsPage = ({
       {totalPages > 1 && (
         <div className="flex items-center justify-between">
           <span className="text-sm text-brand-text-secondary">
-            Page {currentPage} sur {totalPages} ({filteredStudents.length} eleves)
+            Page {currentPage} sur {totalPages} ({filteredStudents.length} etudiants)
           </span>
           <div className="flex gap-2">
             <Button variant="secondary" size="sm" onClick={() => setCurrentPage((p) => Math.max(1, p - 1))} disabled={currentPage === 1}>
@@ -493,7 +506,7 @@ export const StudentsPage = ({
       <Modal
         isOpen={isModalOpen}
         onClose={() => { setIsModalOpen(false); setEditingStudent(null); }}
-        title={editingStudent ? 'Modifier un eleve' : 'Inscrire un eleve'}
+        title={editingStudent ? 'Modifier un etudiant' : 'Inscrire un etudiant'}
         size="4xl"
       >
         <StudentForm
@@ -508,7 +521,7 @@ export const StudentsPage = ({
       <Modal
         isOpen={transferOpen}
         onClose={() => setTransferOpen(false)}
-        title="Transferer des eleves"
+        title="Transferer des etudiants"
         size="4xl"
       >
         <TransferModal

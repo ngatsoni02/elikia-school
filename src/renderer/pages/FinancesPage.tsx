@@ -27,7 +27,7 @@ const ReceiptModal = ({
   const studentFullName = `${student.prenom} ${student.nom.toUpperCase()}`;
   const sanitizedName = `${student.prenom}_${student.nom}`.replace(/[^a-zA-Z0-9_-]/g, '_');
 
-  // Historique des paiements de l'annee scolaire pour cet eleve
+  // Historique des paiements de l'annee academique pour cet etudiant
   const yearPayments = useMemo(() =>
     allPayments
       .filter((p) => p.student_id === student.id && p.school_year === payment.school_year)
@@ -155,7 +155,7 @@ const ReceiptModal = ({
                 <div style={{ display: 'flex', gap: '24px', marginTop: '4px', fontSize: '12px', color: '#555' }}>
                   <span><strong>Matricule:</strong> {student.id}</span>
                   <span><strong>Classe:</strong> {student.classe}</span>
-                  <span><strong>Tuteur:</strong> {student.nom_tuteur}</span>
+                  <span><strong>Eglise:</strong> {student.eglise_locale}</span>
                 </div>
               </div>
             </div>
@@ -209,7 +209,7 @@ const ReceiptModal = ({
             </table>
           </div>
 
-          {/* Historique des paiements de l'annee scolaire */}
+          {/* Historique des paiements de l'annee academique */}
           {yearPayments.length > 1 && (
             <div style={{ margin: '0 28px 16px' }}>
               <div style={{ fontSize: '12px', fontWeight: 700, color: '#333', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
@@ -299,7 +299,7 @@ const ReceiptModal = ({
           <div style={{ margin: '8px 28px 0', padding: '16px 0', borderTop: '1px dashed #ccc', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
             <div style={{ textAlign: 'center', flex: 1 }}>
               <div style={{ borderBottom: '1px solid #999', width: '160px', margin: '0 auto 6px', height: '40px' }} />
-              <div style={{ fontSize: '11px', color: '#666' }}>Le Parent / Tuteur</div>
+              <div style={{ fontSize: '11px', color: '#666' }}>L'Etudiant</div>
             </div>
             <div style={{ textAlign: 'center', flex: 1 }}>
               {settings.receipt_stamp_path ? (
@@ -482,7 +482,7 @@ const FeePaymentsManager = ({ state, updateState }: { state: AppState; updateSta
   return (
     <div className="space-y-4">
       <div className="flex space-x-4">
-        <Input type="text" placeholder="Rechercher un eleve..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="max-w-xs" />
+        <Input type="text" placeholder="Rechercher un etudiant..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="max-w-xs" />
         <Select value={filterClass} onChange={(e) => setFilterClass(e.target.value)} className="max-w-xs">
           <option value="">Toutes les classes</option>
           {state.classes.map((c) => <option key={c.id} value={c.nom}>{c.nom}</option>)}
@@ -492,7 +492,7 @@ const FeePaymentsManager = ({ state, updateState }: { state: AppState; updateSta
         <table className="w-full text-left whitespace-nowrap">
           <thead>
             <tr className="border-b border-brand-border">
-              <th className="p-3 sticky left-0 bg-brand-surface z-10">Eleve</th>
+              <th className="p-3 sticky left-0 bg-brand-surface z-10">Etudiant</th>
               {months.map((m) => (
                 <th key={m} className="p-3 text-center">{new Date(m + '-02').toLocaleString('fr-FR', { month: 'short' })}</th>
               ))}

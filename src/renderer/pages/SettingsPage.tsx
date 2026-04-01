@@ -204,7 +204,7 @@ export const SettingsPage = ({
     const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(state, null, 2));
     const anchor = document.createElement('a');
     anchor.setAttribute('href', dataStr);
-    anchor.setAttribute('download', `elikia-school-backup-${new Date().toISOString().split('T')[0]}.json`);
+    anchor.setAttribute('download', `isb-coserco-backup-${new Date().toISOString().split('T')[0]}.json`);
     document.body.appendChild(anchor);
     anchor.click();
     anchor.remove();
@@ -257,7 +257,7 @@ export const SettingsPage = ({
     toast('Toutes les donnees ont ete reinitialisees.', 'warning');
   };
 
-  // Annees scolaires possibles
+  // Annees academiques possibles
   const currentAutoYear = getSchoolYear();
   const startYear = parseInt(currentAutoYear.split('-')[0]);
   const yearOptions = Array.from({ length: 5 }, (_, i) => {
@@ -293,12 +293,12 @@ export const SettingsPage = ({
             </FormRow>
           </Card>
 
-          {/* Annee scolaire et paiement */}
+          {/* Annee academique et paiement */}
           <Card>
             <h2 className="text-xl font-semibold mb-4 border-b border-brand-border pb-2">Annee Scolaire & Paiements</h2>
             <FormRow>
               <Select
-                label="Annee scolaire"
+                label="Annee academique"
                 name="school_year_override"
                 value={settings.school_year_override || ''}
                 onChange={handleChange}
@@ -444,8 +444,8 @@ export const SettingsPage = ({
           <Card>
             <h2 className="text-xl font-semibold mb-4 border-b border-brand-border pb-2">Apercu des Donnees</h2>
             <div className="space-y-2 text-sm">
-              <div className="flex justify-between"><span className="text-brand-text-secondary">Eleves</span><span className="font-bold">{state.students.length}</span></div>
-              <div className="flex justify-between"><span className="text-brand-text-secondary">Professeurs</span><span className="font-bold">{state.teachers.length}</span></div>
+              <div className="flex justify-between"><span className="text-brand-text-secondary">Etudiants</span><span className="font-bold">{state.students.length}</span></div>
+              <div className="flex justify-between"><span className="text-brand-text-secondary">Enseignants</span><span className="font-bold">{state.teachers.length}</span></div>
               <div className="flex justify-between"><span className="text-brand-text-secondary">Personnel</span><span className="font-bold">{state.staff.length}</span></div>
               <div className="flex justify-between"><span className="text-brand-text-secondary">Classes</span><span className="font-bold">{state.classes.length}</span></div>
               <div className="flex justify-between"><span className="text-brand-text-secondary">Paiements</span><span className="font-bold">{state.payments.length}</span></div>

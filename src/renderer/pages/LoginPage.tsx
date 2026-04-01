@@ -3,7 +3,7 @@ import { User, AppState } from '../types';
 import { Button, Input, Card } from '../components/ui';
 import { SchoolIcon } from '../components/icons';
 
-const REMEMBER_KEY = 'elikia-remember-user';
+const REMEMBER_KEY = 'isb-remember-user';
 
 export const LoginPage = ({
   state,
@@ -70,12 +70,12 @@ export const LoginPage = ({
               <SchoolIcon className="w-16 h-16 text-brand-primary mx-auto mb-4" />
             )}
             <h1 className="text-3xl font-black text-brand-primary tracking-tight">
-              {state.settings.ecole_nom || 'ELIKIA-SCHOOL'}
+              {state.settings.ecole_nom || 'ISB-COSERCO'}
             </h1>
             {state.settings.slogan_ecole && (
               <p className="text-brand-text-secondary text-sm mt-1 italic">{state.settings.slogan_ecole}</p>
             )}
-            <p className="text-brand-text-secondary text-xs mt-3 uppercase tracking-widest font-semibold">Gestion Scolaire</p>
+            <p className="text-brand-text-secondary text-xs mt-3 uppercase tracking-widest font-semibold">Gestion Academique</p>
           </div>
 
           <form onSubmit={handleLogin} className="space-y-4">
@@ -128,7 +128,7 @@ export const LoginPage = ({
         </Card>
 
         <p className="text-center text-xs text-brand-text-secondary mt-4 opacity-50">
-          Logiciel de gestion scolaire hors-ligne
+          Logiciel de gestion academique hors-ligne
         </p>
       </div>
     </div>

@@ -183,7 +183,7 @@ export const AlertsPage = ({ state }: { state: AppState }) => {
       result = result.filter(s =>
         `${s.student.prenom} ${s.student.nom}`.toLowerCase().includes(q) ||
         s.student.id.toLowerCase().includes(q) ||
-        s.student.nom_tuteur.toLowerCase().includes(q),
+        s.student.eglise_locale.toLowerCase().includes(q),
       );
     }
     return result;
@@ -199,7 +199,7 @@ export const AlertsPage = ({ state }: { state: AppState }) => {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Alertes de Paiement</h1>
-          <p className="text-brand-text-secondary mt-1">Suivi des retards de paiement par classe et par eleve.</p>
+          <p className="text-brand-text-secondary mt-1">Suivi des retards de paiement par classe et par etudiant.</p>
         </div>
         <Button onClick={handleExportPdf}>
           <FileDownIcon className="w-4 h-4 mr-2" /> Exporter PDF
@@ -210,7 +210,7 @@ export const AlertsPage = ({ state }: { state: AppState }) => {
       <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
         <Card className="text-center">
           <div className="text-3xl font-black text-brand-text">{stats.total}</div>
-          <div className="text-xs text-brand-text-secondary font-semibold">Eleves en retard</div>
+          <div className="text-xs text-brand-text-secondary font-semibold">Etudiants en retard</div>
           <div className="text-xs text-brand-text-secondary">sur {state.students.length} inscrits</div>
         </Card>
         <Card className="text-center">
@@ -271,7 +271,7 @@ export const AlertsPage = ({ state }: { state: AppState }) => {
           <div className="flex flex-wrap gap-3">
             <Input
               type="text"
-              placeholder="Rechercher un eleve ou tuteur..."
+              placeholder="Rechercher un etudiant ou eglise..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="max-w-xs"
@@ -289,13 +289,13 @@ export const AlertsPage = ({ state }: { state: AppState }) => {
             <table className="w-full text-left text-sm">
               <thead>
                 <tr className="border-b border-brand-border text-brand-text-secondary">
-                  <th className="p-3">Eleve</th>
+                  <th className="p-3">Etudiant</th>
                   <th className="p-3">Classe</th>
                   <th className="p-3 text-center">Severite</th>
                   <th className="p-3">Mois en retard</th>
                   <th className="p-3 text-right">Reste a payer</th>
                   <th className="p-3 text-center">Dernier paiement</th>
-                  <th className="p-3">Tuteur</th>
+                  <th className="p-3">Eglise</th>
                   <th className="p-3">Telephone</th>
                 </tr>
               </thead>
@@ -303,7 +303,7 @@ export const AlertsPage = ({ state }: { state: AppState }) => {
                 {filteredStudents.length === 0 ? (
                   <tr>
                     <td colSpan={8} className="p-8 text-center text-brand-text-secondary">
-                      {stats.total === 0 ? 'Aucun eleve en retard de paiement. Tout est a jour !' : 'Aucun resultat pour ces filtres.'}
+                      {stats.total === 0 ? 'Aucun etudiant en retard de paiement. Tout est a jour !' : 'Aucun resultat pour ces filtres.'}
                     </td>
                   </tr>
                 ) : (
@@ -351,7 +351,7 @@ export const AlertsPage = ({ state }: { state: AppState }) => {
                           : <span className="text-red-400 font-semibold">Aucun</span>
                         }
                       </td>
-                      <td className="p-3 text-sm">{item.student.nom_tuteur}</td>
+                      <td className="p-3 text-sm">{item.student.eglise_locale}</td>
                       <td className="p-3 text-sm">{item.student.telephone}</td>
                     </tr>
                   ))
@@ -366,13 +366,13 @@ export const AlertsPage = ({ state }: { state: AppState }) => {
               <h3 className="font-bold text-sm mb-2">Resume{selectedClasse ? ` - ${selectedClasse}` : ' - Etablissement'}</h3>
               <div className="text-sm text-brand-text-secondary space-y-1">
                 <p>
-                  <span className="font-semibold text-brand-text">{filteredStudents.length}</span> eleve(s) en retard de paiement
+                  <span className="font-semibold text-brand-text">{filteredStudents.length}</span> etudiant(s) en retard de paiement
                   {selectedClasse ? ` dans la classe ${selectedClasse}` : ' dans tout l\'etablissement'},
                   pour un total d'impayes de <span className="font-bold text-brand-danger">{formatCurrency(filteredStudents.reduce((s, i) => s + i.remaining, 0))}</span>.
                 </p>
                 {filteredStudents.filter(s => s.severity === 'critical').length > 0 && (
                   <p className="text-red-400">
-                    <span className="font-bold">{filteredStudents.filter(s => s.severity === 'critical').length}</span> eleve(s) en situation critique (3 mois et plus de retard) necessitent une intervention immediate.
+                    <span className="font-bold">{filteredStudents.filter(s => s.severity === 'critical').length}</span> etudiant(s) en situation critique (3 mois et plus de retard) necessitent une intervention immediate.
                   </p>
                 )}
               </div>

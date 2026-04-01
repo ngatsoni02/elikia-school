@@ -1,11 +1,11 @@
 /**
- * SERVICE WORKER - ELIKIA-SCHOOL PWA
+ * SERVICE WORKER - ISB-COSERCO PWA
  *
  * Cache les ressources pour un fonctionnement offline.
  * Strategy: Cache First + Network Fallback.
  */
 
-const CACHE_NAME = 'elikia-school-v2';
+const CACHE_NAME = 'isb-coserco-v2';
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',

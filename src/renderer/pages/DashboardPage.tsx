@@ -64,8 +64,8 @@ export const DashboardPage = ({ state }: { state: AppState }) => {
     const male = students.filter((s) => s.genre === 'Masculin').length;
     const female = students.filter((s) => s.genre === 'Féminin').length;
     return [
-      { name: 'Garcons', value: male },
-      { name: 'Filles', value: female },
+      { name: 'Hommes', value: male },
+      { name: 'Femmes', value: female },
     ];
   }, [students]);
 
@@ -114,8 +114,8 @@ export const DashboardPage = ({ state }: { state: AppState }) => {
 
       {/* KPIs Row 1 */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
-        <KpiCard title="Eleves" value={totalStudents} icon={<UsersIcon className="w-6 h-6" />} />
-        <KpiCard title="Professeurs" value={totalTeachers} icon={<BookUserIcon className="w-6 h-6" />} />
+        <KpiCard title="Etudiants" value={totalStudents} icon={<UsersIcon className="w-6 h-6" />} />
+        <KpiCard title="Enseignants" value={totalTeachers} icon={<BookUserIcon className="w-6 h-6" />} />
         <KpiCard title="Classes" value={totalClasses} icon={<SchoolIcon className="w-6 h-6" />} />
         <KpiCard title="Revenus (mois)" value={formatCurrency(currentMonthIncome)} icon={<DollarSignIcon className="w-6 h-6" />} valueColor="text-brand-success" />
         <KpiCard title="Depenses (mois)" value={formatCurrency(currentMonthExpenses)} icon={<WalletIcon className="w-6 h-6" />} valueColor="text-brand-danger" />

@@ -11,7 +11,7 @@ function initDatabase() {
     throw new Error('better-sqlite3 not installed: ' + err.message);
   }
 
-  const dbPath = path.join(app.getPath('userData'), 'elikia-school.db');
+  const dbPath = path.join(app.getPath('userData'), 'isb-coserco.db');
   console.log('[DB] Database path:', dbPath);
 
   db = new Database(dbPath);
@@ -144,14 +144,14 @@ function seedIfEmpty() {
   console.log('[DB] Seeding database with initial data...');
 
   db.prepare('INSERT INTO users (id,username,password_hash,prenom,nom,role) VALUES (?,?,?,?,?,?)')
-    .run('USR001','admin','admin','Admin','Principal','Admin');
+    .run('USR001','admin','admin','Admin','Recteur','Admin');
 
   const settings = {
-    ecole_nom: 'ELIKIA-SCHOOL',
-    slogan_ecole: "L'excellence en education",
-    adresse_ecole: "123 Avenue de l'Avenir, Brazzaville, Congo",
-    telephone_ecole: '+242 06 123 45 67',
-    email_ecole: 'contact@elikia-school.cg',
+    ecole_nom: 'ISB-COSERCO',
+    slogan_ecole: "Former des ministres solides pour l'Eglise et la Nation",
+    adresse_ecole: 'Brazzaville, Republique du Congo',
+    telephone_ecole: '+242 06 000 00 00',
+    email_ecole: 'contact@isb-coserco.cg',
     logo_path: '', receipt_logo_path: '', receipt_stamp_path: '',
     watermark_enabled: 'true', watermark_opacity: '0.08', watermark_scale: '0.5',
     fee_due_day: '5', background_image_path: '', background_opacity: '0.08',
@@ -161,32 +161,28 @@ function seedIfEmpty() {
 
   const insClass = db.prepare('INSERT INTO classes (id,nom,niveau,grade,serie,enseignant_principal,frais_scolarite) VALUES (?,?,?,?,?,?,?)');
   [
-    ['P1A','PS A','Prescolaire','Petite Section',null,'Sylvie Kouka',25000],
-    ['P2A','MS A','Prescolaire','Moyenne Section',null,'Sylvie Kouka',27000],
-    ['PR1A','CP1 A','Primaire','CP1',null,'Paul M.',30000],
-    ['PR2A','CP2 A','Primaire','CP2',null,'Paul M.',30000],
-    ['PR5A','CM1 A','Primaire','CM1',null,'Nathalie B.',32000],
-    ['C6A','6eme A','Collège','6ème',null,'Alain Goma',55000],
-    ['C3A','3eme B','Collège','3ème',null,'Alain Goma',58000],
-    ['L2S','Seconde S','Lycée','Seconde','S','Ruth Dianga',125000],
-    ['L1L','Premiere L','Lycée','Première','L','Didier M.',130000],
-    ['LTS','Terminale S','Lycée','Terminale','S','Ruth Dianga',135000],
+    ['A1A','1ere Annee Groupe A','1ere Annee','Groupe A',null,'Dr. Ngoma Pascal',25000],
+    ['A1B','1ere Annee Groupe B','1ere Annee','Groupe B',null,'Pasteur Kodia Marie',25000],
+    ['A2A','2eme Annee Groupe A','2eme Annee','Groupe A',null,'Dr. Massamba Pierre',30000],
+    ['A2B','2eme Annee Groupe B','2eme Annee','Groupe B',null,'Pasteur Mouanda Jean',30000],
+    ['A3P','3eme Annee Pastorale','3eme Annee','Section Pastorale','Section Pastorale','Dr. Bakala Simon',35000],
+    ['A3M','3eme Annee Missions','3eme Annee','Section Missionnaire','Section Missionnaire','Pasteur Loemba David',35000],
   ].forEach(c => insClass.run(...c));
 
   const insTeacher = db.prepare('INSERT INTO teachers (id,nom,prenom,matiere,niveaux_enseignes,embauche,telephone,email,salaire_mensuel) VALUES (?,?,?,?,?,?,?,?,?)');
   [
-    ['T2408010001','Mabiala','Jean-Pierre','Mathematiques','["6ème","3ème","Seconde","Première","Terminale"]','2018-09-01','051234567','jpmabiala@school.cg',350000],
-    ['T2408010002','Kouka','Sylvie','Francais','["Petite Section","Moyenne Section","CP1","CP2"]','2019-03-01','069876543','sylvie@school.cg',280000],
-    ['T2408010003','M.','Paul','Histoire','["CP1","CP2","CE1","CE2"]','2020-01-15','061122334','paul.m@school.cg',290000],
-    ['T2408010004','B.','Nathalie','Sciences','["CM1","CM2","6ème"]','2017-08-21','065566778','nathalie.b@school.cg',310000],
-    ['T2408010005','Goma','Alain','Anglais','["6ème","5ème","4ème","3ème"]','2015-09-01','069988776','alain.goma@school.cg',400000],
-    ['T2408010006','Dianga','Ruth','Physique-Chimie','["Seconde","Première","Terminale"]','2019-10-01','061239876','ruth.dianga@school.cg',380000],
-    ['T2408010007','M.','Didier','Philosophie','["Première","Terminale"]','2021-02-11','064561237','didier.m@school.cg',360000],
+    ['T2408010001','Ngoma','Pascal','Hermeneutique','["1ere Annee","2eme Annee"]','2018-09-01','051234567','p.ngoma@isb-coserco.cg',350000],
+    ['T2408010002','Kodia','Marie','Theologie Systematique','["1ere Annee","2eme Annee","3eme Annee"]','2019-03-01','069876543','m.kodia@isb-coserco.cg',280000],
+    ['T2408010003','Massamba','Pierre','Homiletique','["2eme Annee","3eme Annee"]','2020-01-15','061122334','p.massamba@isb-coserco.cg',290000],
+    ['T2408010004','Mouanda','Jean','Pneumatologie','["1ere Annee","2eme Annee"]','2017-08-21','065566778','j.mouanda@isb-coserco.cg',310000],
+    ['T2408010005','Bakala','Simon','Missiologie','["2eme Annee","3eme Annee"]','2015-09-01','069988776','s.bakala@isb-coserco.cg',400000],
+    ['T2408010006','Loemba','David','Pastorale','["3eme Annee"]','2019-10-01','061239876','d.loemba@isb-coserco.cg',380000],
+    ['T2408010007','Moukoko','Ruth','Leadership','["1ere Annee","2eme Annee","3eme Annee"]','2021-02-11','064561237','r.moukoko@isb-coserco.cg',360000],
   ].forEach(t => insTeacher.run(...t));
 
   const insStudent = db.prepare('INSERT INTO students (id,nom,prenom,genre,date_naissance,lieu_naissance,adresse,nom_tuteur,telephone,email,classe,statut_frais) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)');
-  insStudent.run('S2408010001','MABIALA','Kevin','Masculin','2008-03-08','Brazzaville','123 Rue de la Paix','Jean Mabiala','068799791','fouss@gmail.com','6eme A','En retard');
-  insStudent.run('S2408010002','IBARA','Grace','Féminin','2010-01-10','Brazzaville','456 Avenue des Manguiers','Marie Ibara','061234567','x@x.com','PS A','En retard');
+  insStudent.run('S2408010001','MABIALA','Kevin','Masculin','1995-03-08','Brazzaville','123 Rue de la Paix','Eglise Evangelique du Congo','068799791','kevin@gmail.com','1ere Annee Groupe A','En retard');
+  insStudent.run('S2408010002','IBARA','Grace','Féminin','1998-01-10','Brazzaville','456 Avenue des Manguiers','Eglise de Dieu en Christ','061234567','grace@gmail.com','2eme Annee Groupe A','En retard');
   insStudent.run('S2408010003','NKOUKA','Elodie','Féminin','2011-05-05','Pointe-Noire',"789 Boulevard de l'Independance",'Pierre Nkouka','067654321','y@y.com','Premiere L','En retard');
 
   const insStaff = db.prepare('INSERT INTO staff (id,nom,prenom,role,embauche,telephone,email,salaire_mensuel) VALUES (?,?,?,?,?,?,?,?)');

@@ -6,10 +6,14 @@ export interface Student {
   date_naissance: string;
   lieu_naissance: string;
   adresse: string;
-  nom_tuteur: string;
+  eglise_locale: string;
+  pasteur_recommandant: string;
   telephone: string;
   email: string;
   classe: string;
+  annee_etude: '1ere Annee' | '2eme Annee' | '3eme Annee';
+  niveau_admission: string;
+  date_bapteme: string;
   statut_frais: string;
   photo_path?: string;
 }
@@ -42,16 +46,16 @@ export interface Staff {
 export interface Classe {
   id: string;
   nom: string;
-  niveau: 'Prescolaire' | 'Primaire' | 'Collège' | 'Lycée';
+  niveau: '1ere Annee' | '2eme Annee' | '3eme Annee';
   grade: string;
-  serie?: string;
+  specialisation?: string;
   enseignant_principal: string;
   frais_scolarite: number;
 }
 
-export type ExpenseCategory = 'Loyer' | 'Électricité' | 'Eau' | 'Fournitures' | 'Maintenance' | 'Marketing' | 'Autre';
+export type ExpenseCategory = 'Loyer' | 'Électricité' | 'Eau' | 'Fournitures' | 'Maintenance' | 'Impression' | 'Autre';
 
-export const expenseCategories: ExpenseCategory[] = ['Loyer', 'Électricité', 'Eau', 'Fournitures', 'Maintenance', 'Marketing', 'Autre'];
+export const expenseCategories: ExpenseCategory[] = ['Loyer', 'Électricité', 'Eau', 'Fournitures', 'Maintenance', 'Impression', 'Autre'];
 
 export interface Expense {
   id: string;
@@ -116,10 +120,8 @@ export interface AppSettings {
   fee_due_day: number;
   background_image_path: string | null;
   background_opacity: number;
-  // Auto-backup
   auto_backup_enabled: boolean;
   auto_backup_interval_minutes: number;
-  // Annee scolaire manuelle (optionnel, sinon auto-detect)
   school_year_override: string | null;
 }
 

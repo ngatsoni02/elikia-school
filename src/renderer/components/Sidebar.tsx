@@ -14,8 +14,8 @@ interface NavItem {
 
 const navItems: NavItem[] = [
   { name: 'Dashboard', label: 'Dashboard', icon: HomeIcon },
-  { name: 'Students', label: 'Eleves', icon: UsersIcon },
-  { name: 'Teachers', label: 'Professeurs', icon: BookUserIcon },
+  { name: 'Students', label: 'Etudiants', icon: UsersIcon },
+  { name: 'Teachers', label: 'Enseignants', icon: BookUserIcon },
   { name: 'Staff', label: 'Personnel', icon: ClipboardUserIcon },
   { name: 'Classes', label: 'Classes', icon: SchoolIcon },
   { name: 'Finances', label: 'Finances', icon: DollarSignIcon },
@@ -49,7 +49,7 @@ export const Sidebar = ({
         <SchoolIcon className="w-8 h-8 text-brand-primary flex-shrink-0" />
       )}
       <h1 className="text-lg font-bold text-brand-text ml-2 leading-tight truncate">
-        {settings?.ecole_nom || 'ELIKIA-SCHOOL'}
+        {settings?.ecole_nom || 'ISB-COSERCO'}
       </h1>
     </div>
 

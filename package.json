@@ -1,7 +1,7 @@
 {
-  "name": "elikia-school",
+  "name": "isb-coserco",
   "version": "2.0.0",
-  "description": "Application de gestion scolaire complete pour ELIKIA-SCHOOL - Eleves, Professeurs, Finances, Emploi du temps.",
+  "description": "Application de gestion academique pour ISB-COSERCO - Etudiants, Enseignants, Finances, Emploi du temps.",
   "main": "src/main/main.js",
   "scripts": {
     "dev": "concurrently \"npm run dev:css\" \"npm run dev:js\"",
@@ -17,12 +17,13 @@
     "dist:linux": "npm run build:assets && electron-builder --linux"
   },
   "keywords": [
-    "school",
+    "institute",
     "management",
     "education",
+    "theology",
     "electron"
   ],
-  "author": "ELIKIA-SCHOOL",
+  "author": "ISB-COSERCO",
   "license": "MIT",
   "dependencies": {
     "better-sqlite3": "^11.7.0",
@@ -42,8 +43,8 @@
     "tailwindcss": "^3.4.17"
   },
   "build": {
-    "appId": "com.elikiaschool.app",
-    "productName": "ELIKIA School Management",
+    "appId": "com.isb-coserco.app",
+    "productName": "ISB-COSERCO Gestion Academique",
     "directories": {
       "output": "release"
     },
@@ -76,7 +77,7 @@
       "uninstallerIcon": "assets/icon.ico",
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
-      "shortcutName": "ELIKIA School"
+      "shortcutName": "ISB-COSERCO"
     },
     "linux": {
       "target": ["AppImage"],

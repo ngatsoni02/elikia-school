@@ -1,7 +1,7 @@
 {
-  "name": "ELIKIA-SCHOOL Management",
-  "short_name": "ELIKIA",
-  "description": "Application de gestion scolaire - Eleves, Professeurs, Finances",
+  "name": "ISB-COSERCO Gestion Academique",
+  "short_name": "ISB-COSERCO",
+  "description": "Application de gestion academique - Etudiants, Enseignants, Finances",
   "start_url": "/index.html",
   "display": "standalone",
   "background_color": "#151a21",

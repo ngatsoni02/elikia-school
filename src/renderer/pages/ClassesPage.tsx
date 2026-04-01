@@ -19,7 +19,7 @@ const ClasseForm = ({
   const [formData, setFormData] = useState<Omit<Classe, 'id'>>(() =>
     item
       ? { ...item }
-      : { nom: '', niveau: 'Primaire', grade: '', enseignant_principal: '', frais_scolarite: 0, serie: '' },
+      : { nom: '', niveau: '1ere Annee', grade: '', enseignant_principal: '', frais_scolarite: 0, specialisation: '' },
   );
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -36,7 +36,7 @@ const ClasseForm = ({
   return (
     <form onSubmit={(e) => { e.preventDefault(); onSave({ ...formData, id: item?.id || '' }); }}>
       <FormRow>
-        <Input label="Nom de la classe (Ex: CP1 A)" name="nom" value={formData.nom} onChange={handleChange} required />
+        <Input label="Nom de la classe (Ex: 1ere Annee - Groupe A)" name="nom" value={formData.nom} onChange={handleChange} required />
         <Select label="Niveau" name="niveau" value={formData.niveau} onChange={handleChange}>
           {Object.keys(gradeLevels).map((level) => <option key={level}>{level}</option>)}
         </Select>
@@ -46,12 +46,12 @@ const ClasseForm = ({
           <option value="">Selectionner un grade</option>
           {gradeLevels[formData.niveau].map((grade) => <option key={grade}>{grade}</option>)}
         </Select>
-        {formData.niveau === 'Lycée' && (
-          <Input label="Serie (Ex: S, L)" name="serie" value={formData.serie} onChange={handleChange} />
+        {formData.niveau === '3eme Annee' && (
+          <Input label="Specialisation" name="specialisation" value={formData.specialisation} onChange={handleChange} placeholder="Pastorale, Missions..." />
         )}
       </FormRow>
       <FormRow>
-        <Select label="Enseignant Principal" name="enseignant_principal" value={formData.enseignant_principal} onChange={handleChange} required>
+        <Select label="Responsable de promotion" name="enseignant_principal" value={formData.enseignant_principal} onChange={handleChange} required>
           <option value="">Selectionner un enseignant</option>
           {state.teachers.map((t) => (
             <option key={t.id} value={`${t.prenom} ${t.nom}`}>{t.prenom} {t.nom}</option>
@@ -83,8 +83,8 @@ export const ClassesPage = ({
     columns={[
       { header: 'Nom', accessor: (c) => c.nom },
       { header: 'Niveau', accessor: (c) => c.niveau },
-      { header: 'Prof. Principal', accessor: (c) => c.enseignant_principal },
-      { header: 'Eleves', accessor: (c) => state.students.filter((s) => s.classe === c.nom).length, className: 'text-center' },
+      { header: 'Responsable', accessor: (c) => c.enseignant_principal },
+      { header: 'Etudiants', accessor: (c) => state.students.filter((s) => s.classe === c.nom).length, className: 'text-center' },
       { header: 'Frais Scolarite', accessor: (c) => formatCurrency(c.frais_scolarite), className: 'text-right' },
     ]}
     searchFields={['nom', 'niveau', 'enseignant_principal']}

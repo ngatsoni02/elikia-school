@@ -12,8 +12,8 @@ interface SearchResult {
 
 const PAGE_LABELS: Record<PageName, string> = {
   Dashboard: 'Tableau de bord',
-  Students: 'Eleves',
-  Teachers: 'Professeurs',
+  Students: 'Etudiants',
+  Teachers: 'Enseignants',
   Staff: 'Personnel',
   Classes: 'Classes',
   Finances: 'Finances',
@@ -77,12 +77,12 @@ export const GlobalSearch = ({
     state.students.filter((s) =>
       `${s.prenom} ${s.nom}`.toLowerCase().includes(q) ||
       s.id.toLowerCase().includes(q) ||
-      s.nom_tuteur.toLowerCase().includes(q)
+      s.eglise_locale.toLowerCase().includes(q)
     ).slice(0, 6).forEach((s) => {
       items.push({
         type: 'student',
         label: `${s.prenom} ${s.nom.toUpperCase()}`,
-        sub: `Eleve - ${s.classe} | ${s.id}`,
+        sub: `Etudiant - ${s.classe} | ${s.id}`,
         avatar: getPhotoOrAvatar(s.photo_path, s.prenom, s.nom),
         action: () => { onNavigate('Students'); onClose(); },
       });
@@ -96,7 +96,7 @@ export const GlobalSearch = ({
       items.push({
         type: 'teacher',
         label: `${t.prenom} ${t.nom.toUpperCase()}`,
-        sub: `Professeur - ${t.matiere}`,
+        sub: `Enseignant - ${t.matiere}`,
         avatar: getPhotoOrAvatar(t.photo_path, t.prenom, t.nom),
         action: () => { onNavigate('Teachers'); onClose(); },
       });
@@ -171,7 +171,7 @@ export const GlobalSearch = ({
             value={query}
             onChange={(e) => { setQuery(e.target.value); setSelectedIdx(0); }}
             onKeyDown={handleKeyDown}
-            placeholder="Rechercher un eleve, professeur, page..."
+            placeholder="Rechercher un etudiant, enseignant, page..."
             className="flex-1 bg-transparent border-none outline-none py-4 text-brand-text placeholder-brand-text-secondary"
           />
           <kbd className="text-xs text-brand-text-secondary bg-brand-surface px-2 py-1 rounded border border-brand-border">ESC</kbd>

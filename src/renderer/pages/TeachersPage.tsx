@@ -73,7 +73,7 @@ export const TeachersPage = ({
   updateState: (updater: (prevState: AppState) => AppState) => void;
 }) => (
   <CrudManagerPage
-    title="Professeurs"
+    title="Enseignants"
     items={state.teachers}
     updateState={updateState}
     FormComponent={TeacherForm}

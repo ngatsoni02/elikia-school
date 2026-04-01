@@ -59,8 +59,7 @@ export const getOverdueStatus = (
 };
 
 export const gradeLevels: Record<Classe['niveau'], string[]> = {
-  Prescolaire: ['Petite Section', 'Moyenne Section', 'Grande Section'],
-  Primaire: ['CP1', 'CP2', 'CE1', 'CE2', 'CM1', 'CM2'],
-  'Collège': ['6ème', '5ème', '4ème', '3ème'],
-  'Lycée': ['Seconde', 'Première', 'Terminale'],
+  '1ere Annee': ['Groupe A', 'Groupe B', 'Groupe C'],
+  '2eme Annee': ['Groupe A', 'Groupe B', 'Groupe C'],
+  '3eme Annee': ['Section Pastorale', 'Section Missionnaire', 'Section Direction'],
 };

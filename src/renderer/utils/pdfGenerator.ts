@@ -120,7 +120,7 @@ function drawHeader(doc: jsPDF, s: AppSettings, title: string, subtitle?: string
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(7);
   const dateStr = new Date().toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' });
-  doc.text(subtitle || `Annee scolaire ${getSchoolYear()} | Edite le ${dateStr}`, pw - 12, 22, { align: 'right' });
+  doc.text(subtitle || `Annee academique ${getSchoolYear()} | Edite le ${dateStr}`, pw - 12, 22, { align: 'right' });
 
   doc.setFillColor(...C.accent);
   doc.rect(0, 35, pw, 1.5, 'F');
@@ -413,19 +413,19 @@ export function generateStudentListPdf(
       date_naissance: formatDate(s.date_naissance),
       classe: s.classe,
       niveau: classe?.niveau || '-',
-      tuteur: s.nom_tuteur,
+      eglise: s.eglise_locale,
       telephone: s.telephone,
     };
   });
 
-  const garcons = filtered.filter(s => s.genre === 'Masculin').length;
-  const filles = filtered.filter(s => s.genre === 'Féminin').length;
+  const hommes = filtered.filter(s => s.genre === 'Masculin').length;
+  const femmes = filtered.filter(s => s.genre === 'Féminin').length;
 
   const byClasse = new Map<string, number>();
   filtered.forEach(s => byClasse.set(s.classe, (byClasse.get(s.classe) || 0) + 1));
 
   const comments: CommentItem[] = [
-    { icon: 'info', text: `Effectif total : ${filtered.length} eleve(s)${filterClasse ? ` en classe de ${filterClasse}` : ` repartis dans ${byClasse.size} classe(s)`}. Garcons : ${garcons} (${filtered.length > 0 ? Math.round(garcons / filtered.length * 100) : 0}%) | Filles : ${filles} (${filtered.length > 0 ? Math.round(filles / filtered.length * 100) : 0}%).` },
+    { icon: 'info', text: `Effectif total : ${filtered.length} etudiant(s)${filterClasse ? ` en classe de ${filterClasse}` : ` repartis dans ${byClasse.size} classe(s)`}. Hommes : ${hommes} (${filtered.length > 0 ? Math.round(hommes / filtered.length * 100) : 0}%) | Femmes : ${femmes} (${filtered.length > 0 ? Math.round(femmes / filtered.length * 100) : 0}%).` },
   ];
 
   if (!filterClasse && byClasse.size > 0) {
@@ -437,8 +437,8 @@ export function generateStudentListPdf(
   }
 
   generatePdf({
-    title: filterClasse ? `Liste des Eleves - ${filterClasse}` : 'Liste Generale des Eleves',
-    subtitle: `Annee scolaire ${schoolYear}`,
+    title: filterClasse ? `Liste des Etudiants - ${filterClasse}` : 'Liste Generale des Etudiants',
+    subtitle: `Annee academique ${schoolYear}`,
     settings,
     columns: [
       { header: 'No',             dataKey: 'no',             halign: 'center', width: 1 },
@@ -448,28 +448,28 @@ export function generateStudentListPdf(
       { header: 'Date Naiss.',    dataKey: 'date_naissance', halign: 'center', width: 2.5 },
       { header: 'Classe',         dataKey: 'classe',         halign: 'center', width: 2 },
       { header: 'Niveau',         dataKey: 'niveau',         halign: 'center', width: 2 },
-      { header: 'Tuteur',         dataKey: 'tuteur',         halign: 'left',   width: 3 },
+      { header: 'Eglise',          dataKey: 'eglise',         halign: 'left',   width: 3 },
       { header: 'Telephone',      dataKey: 'telephone',      halign: 'center', width: 2.5 },
     ],
     rows,
-    fileName: `Liste_Eleves_${filterClasse || 'Tous'}_${schoolYear.replace('/', '-')}.pdf`,
+    fileName: `Liste_Etudiants_${filterClasse || 'Tous'}_${schoolYear.replace('/', '-')}.pdf`,
     orientation: 'landscape',
     summaryRows: [
-      { label: 'Garcons', value: String(garcons) },
-      { label: 'Filles', value: String(filles) },
+      { label: 'Hommes', value: String(hommes) },
+      { label: 'Femmes', value: String(femmes) },
       { label: 'Total', value: String(filtered.length) },
     ],
     totalRow: {
-      no: '', matricule: '', nom: 'TOTAL', genre: `${garcons}G/${filles}F`,
-      date_naissance: '', classe: '', niveau: '', tuteur: '',
-      telephone: String(filtered.length) + ' eleve(s)',
+      no: '', matricule: '', nom: 'TOTAL', genre: `${hommes}H/${femmes}F`,
+      date_naissance: '', classe: '', niveau: '', eglise: '',
+      telephone: String(filtered.length) + ' etudiant(s)',
     },
     comments,
   });
 }
 
 // =============================================
-// Fiche individuelle eleve (PDF)
+// Fiche individuelle etudiant (PDF)
 // =============================================
 export function generateStudentCardPdf(
   student: import('../types').Student,
@@ -495,14 +495,14 @@ export function generateStudentCardPdf(
   }));
 
   const comments: CommentItem[] = [
-    { icon: 'info', text: `Fiche de ${student.prenom} ${student.nom.toUpperCase()} - Matricule : ${student.id}. Classe : ${student.classe}. Tuteur : ${student.nom_tuteur} (${student.telephone}).` },
+    { icon: 'info', text: `Fiche de ${student.prenom} ${student.nom.toUpperCase()} - Matricule : ${student.id}. Classe : ${student.classe}. Eglise : ${student.eglise_locale} (${student.telephone}).` },
     { icon: totalPaid >= totalDue && totalDue > 0 ? 'success' : remaining > 0 ? 'warning' : 'info',
       text: `Situation financiere : ${formatCurrency(totalPaid)} payes sur ${formatCurrency(totalDue)} attendus. Reste : ${formatCurrency(remaining)}. ${totalPaid >= totalDue && totalDue > 0 ? 'Frais de scolarite soldes.' : ''}` },
   ];
 
   generatePdf({
     title: `Fiche Scolaire - ${student.prenom} ${student.nom.toUpperCase()}`,
-    subtitle: `Classe: ${student.classe} | Annee scolaire ${schoolYear}`,
+    subtitle: `Classe: ${student.classe} | Annee academique ${schoolYear}`,
     settings,
     columns: [
       { header: 'No',       dataKey: 'no',      halign: 'center', width: 1 },
@@ -558,14 +558,14 @@ export function generateStudentsReport(
       matricule: s.id,
       nom: `${s.prenom} ${s.nom.toUpperCase()}`,
       classe: s.classe,
-      tuteur: s.nom_tuteur,
+      eglise: s.eglise_locale,
       telephone: s.telephone,
       paye: formatCurrency(totalPaid),
       reste: formatCurrency(remaining),
     };
   });
 
-  // ---- Commentaires eleves ----
+  // ---- Commentaires etudiants ----
   const totalDue = grandTotalPaid + grandTotalReste;
   const tauxRecouvrement = totalDue > 0 ? Math.round(grandTotalPaid / totalDue * 100) : 0;
   const studentsNoPayment = filtered.filter(s => {
@@ -580,7 +580,7 @@ export function generateStudentsReport(
   });
 
   const comments: CommentItem[] = [
-    { icon: 'info', text: `Effectif total : ${filtered.length} eleves inscrits${filterClasse ? ` en ${filterClasse}` : ' toutes classes confondues'}. Frais attendus pour l'annee : ${formatCurrency(totalDue)}.` },
+    { icon: 'info', text: `Effectif total : ${filtered.length} etudiants inscrits${filterClasse ? ` en ${filterClasse}` : ' toutes classes confondues'}. Frais attendus pour l'annee : ${formatCurrency(totalDue)}.` },
   ];
 
   if (tauxRecouvrement >= 75) {
@@ -592,15 +592,15 @@ export function generateStudentsReport(
   }
 
   if (studentsNoPayment.length > 0) {
-    comments.push({ icon: 'warning', text: `${studentsNoPayment.length} eleve(s) n'ont effectue aucun paiement cette annee. Noms : ${studentsNoPayment.slice(0, 5).map(s => `${s.prenom} ${s.nom}`).join(', ')}${studentsNoPayment.length > 5 ? ` et ${studentsNoPayment.length - 5} autre(s)` : ''}.` });
+    comments.push({ icon: 'warning', text: `${studentsNoPayment.length} etudiant(s) n'ont effectue aucun paiement cette annee. Noms : ${studentsNoPayment.slice(0, 5).map(s => `${s.prenom} ${s.nom}`).join(', ')}${studentsNoPayment.length > 5 ? ` et ${studentsNoPayment.length - 5} autre(s)` : ''}.` });
   }
 
   if (studentsComplete.length > 0) {
-    comments.push({ icon: 'success', text: `${studentsComplete.length} eleve(s) sont a jour dans le paiement integral de leurs frais de scolarite.` });
+    comments.push({ icon: 'success', text: `${studentsComplete.length} etudiant(s) sont a jour dans le paiement integral de leurs frais de scolarite.` });
   }
 
   generatePdf({
-    title: 'Releve des Eleves',
+    title: 'Releve des Etudiants',
     subtitle: filterClasse ? `Classe: ${filterClasse} | Annee ${schoolYear}` : `Toutes les classes | Annee ${schoolYear}`,
     settings,
     columns: [
@@ -608,21 +608,21 @@ export function generateStudentsReport(
       { header: 'Matricule',  dataKey: 'matricule', halign: 'center', width: 2.5 },
       { header: 'Nom Complet',dataKey: 'nom',       halign: 'left',   width: 4 },
       { header: 'Classe',     dataKey: 'classe',    halign: 'center', width: 2 },
-      { header: 'Tuteur',     dataKey: 'tuteur',    halign: 'left',   width: 3 },
+      { header: 'Eglise',     dataKey: 'eglise',    halign: 'left',   width: 3 },
       { header: 'Telephone',  dataKey: 'telephone', halign: 'center', width: 2.5 },
       { header: 'Total Paye', dataKey: 'paye',      halign: 'right',  width: 2.5 },
       { header: 'Reste',      dataKey: 'reste',     halign: 'right',  width: 2.5 },
     ],
     rows,
-    fileName: `Releve_Eleves_${filterClasse || 'Tous'}_${schoolYear.replace('/', '-')}.pdf`,
+    fileName: `Releve_Etudiants_${filterClasse || 'Tous'}_${schoolYear.replace('/', '-')}.pdf`,
     orientation: 'landscape',
     summaryRows: [
       { label: 'Encaisse', value: formatCurrency(grandTotalPaid) },
       { label: 'Reste', value: formatCurrency(grandTotalReste) },
     ],
     totalRow: {
-      no: '', matricule: '', nom: 'TOTAL', classe: '', tuteur: '',
-      telephone: String(filtered.length) + ' eleves',
+      no: '', matricule: '', nom: 'TOTAL', classe: '', eglise: '',
+      telephone: String(filtered.length) + ' etudiants',
       paye: formatCurrency(grandTotalPaid), reste: formatCurrency(grandTotalReste),
     },
     comments,
@@ -661,17 +661,17 @@ export function generateTeachersReport(
   const nonPayes = teachers.filter(t => salaryPayments.filter(p => p.employee_id === t.id).length === 0);
 
   const comments: CommentItem[] = [
-    { icon: 'info', text: `Effectif enseignant : ${teachers.length} professeurs. Masse salariale mensuelle : ${formatCurrency(grandTotalSalaire)}. Masse salariale annuelle estimee (10 mois) : ${formatCurrency(grandTotalSalaire * 10)}.` },
+    { icon: 'info', text: `Effectif enseignant : ${teachers.length} enseignants. Masse salariale mensuelle : ${formatCurrency(grandTotalSalaire)}. Masse salariale annuelle estimee (10 mois) : ${formatCurrency(grandTotalSalaire * 10)}.` },
     { icon: tauxVersement >= 80 ? 'success' : tauxVersement >= 50 ? 'warning' : 'danger',
       text: `Taux de versement des salaires : ${tauxVersement}% (${formatCurrency(grandTotalPaid)} verses sur ${formatCurrency(totalAttendu)} attendus pour ${moisEcoules} mois ecoules).` },
   ];
   if (nonPayes.length > 0) {
-    comments.push({ icon: 'warning', text: `${nonPayes.length} professeur(s) n'ont recu aucun salaire : ${nonPayes.slice(0, 4).map(t => `${t.prenom} ${t.nom}`).join(', ')}${nonPayes.length > 4 ? '...' : ''}.` });
+    comments.push({ icon: 'warning', text: `${nonPayes.length} enseignant(s) n'ont recu aucun salaire : ${nonPayes.slice(0, 4).map(t => `${t.prenom} ${t.nom}`).join(', ')}${nonPayes.length > 4 ? '...' : ''}.` });
   }
 
   generatePdf({
-    title: 'Releve des Professeurs',
-    subtitle: `Annee scolaire ${schoolYear}`,
+    title: 'Releve des Enseignants',
+    subtitle: `Annee academique ${schoolYear}`,
     settings,
     columns: [
       { header: 'No',          dataKey: 'no',         halign: 'center', width: 1 },
@@ -684,14 +684,14 @@ export function generateTeachersReport(
       { header: 'Total verse', dataKey: 'total_paye', halign: 'right',  width: 2.5 },
     ],
     rows,
-    fileName: `Releve_Professeurs_${schoolYear.replace('/', '-')}.pdf`,
+    fileName: `Releve_Enseignants_${schoolYear.replace('/', '-')}.pdf`,
     orientation: 'landscape',
     summaryRows: [
       { label: 'Masse salariale/mois', value: formatCurrency(grandTotalSalaire) },
       { label: 'Total verse', value: formatCurrency(grandTotalPaid) },
     ],
     totalRow: {
-      no: '', matricule: '', nom: 'TOTAL', matiere: '', telephone: String(teachers.length) + ' prof.',
+      no: '', matricule: '', nom: 'TOTAL', matiere: '', telephone: String(teachers.length) + ' ens.',
       email: '', salaire: formatCurrency(grandTotalSalaire), total_paye: formatCurrency(grandTotalPaid),
     },
     comments,
@@ -736,7 +736,7 @@ export function generateStaffReport(
 
   generatePdf({
     title: 'Releve du Personnel',
-    subtitle: `Annee scolaire ${schoolYear}`,
+    subtitle: `Annee academique ${schoolYear}`,
     settings,
     columns: [
       { header: 'No',          dataKey: 'no',         halign: 'center', width: 1 },
@@ -816,13 +816,13 @@ export function generatePaymentsReport(
     title: 'Releve des Paiements',
     subtitle: filterMonth
       ? `Mois: ${new Date(filterMonth + '-02').toLocaleString('fr-FR', { month: 'long', year: 'numeric' })}`
-      : `Annee scolaire ${schoolYear}`,
+      : `Annee academique ${schoolYear}`,
     settings,
     columns: [
       { header: 'No',      dataKey: 'no',      halign: 'center', width: 1 },
       { header: 'No Recu', dataKey: 'receipt',  halign: 'center', width: 2 },
       { header: 'Date',    dataKey: 'date',     halign: 'center', width: 2 },
-      { header: 'Eleve',   dataKey: 'eleve',    halign: 'left',   width: 4 },
+      { header: 'Etudiant', dataKey: 'eleve',    halign: 'left',   width: 4 },
       { header: 'Classe',  dataKey: 'classe',   halign: 'center', width: 2 },
       { header: 'Mois concerne', dataKey: 'mois', halign: 'left', width: 3 },
       { header: 'Methode', dataKey: 'methode',  halign: 'center', width: 2.5 },
@@ -885,7 +885,7 @@ export function generateExpensesReport(
 
   generatePdf({
     title: 'Releve des Depenses',
-    subtitle: `Annee scolaire ${getSchoolYear()}`,
+    subtitle: `Annee academique ${getSchoolYear()}`,
     settings,
     columns: [
       { header: 'No',          dataKey: 'no',          halign: 'center', width: 1 },
@@ -952,31 +952,31 @@ export function generateClassesReport(
   const emptyClasses = classData.filter(c => c.effectif === 0);
 
   const comments: CommentItem[] = [
-    { icon: 'info', text: `${classes.length} classes pour un effectif total de ${students.length} eleves. Frais attendus : ${formatCurrency(grandExpected)}. Encaisse : ${formatCurrency(grandPaid)}.` },
+    { icon: 'info', text: `${classes.length} classes pour un effectif total de ${students.length} etudiants. Frais attendus : ${formatCurrency(grandExpected)}. Encaisse : ${formatCurrency(grandPaid)}.` },
     { icon: globalTaux >= 70 ? 'success' : globalTaux >= 40 ? 'warning' : 'danger',
       text: `Taux de recouvrement global : ${globalTaux}%. ${globalTaux >= 70 ? 'Bonne performance de recouvrement.' : globalTaux >= 40 ? 'Performance moyenne, des efforts de recouvrement sont necessaires.' : 'Situation critique, des mesures urgentes s\'imposent.'}` },
   ];
 
   if (bestClass && bestClass.taux > 0) {
-    comments.push({ icon: 'success', text: `Meilleure classe : ${bestClass.nom} avec un taux de ${bestClass.taux}% (${bestClass.effectif} eleves).` });
+    comments.push({ icon: 'success', text: `Meilleure classe : ${bestClass.nom} avec un taux de ${bestClass.taux}% (${bestClass.effectif} etudiants).` });
   }
   if (worstClass && worstClass.taux < globalTaux && classData.length > 1) {
-    comments.push({ icon: 'warning', text: `Classe a surveiller : ${worstClass.nom} avec un taux de ${worstClass.taux}% seulement (${worstClass.effectif} eleves).` });
+    comments.push({ icon: 'warning', text: `Classe a surveiller : ${worstClass.nom} avec un taux de ${worstClass.taux}% seulement (${worstClass.effectif} etudiants).` });
   }
   if (emptyClasses.length > 0) {
-    comments.push({ icon: 'warning', text: `${emptyClasses.length} classe(s) sans eleves inscrits : ${emptyClasses.map(c => c.nom).join(', ')}.` });
+    comments.push({ icon: 'warning', text: `${emptyClasses.length} classe(s) sans etudiants inscrits : ${emptyClasses.map(c => c.nom).join(', ')}.` });
   }
 
   generatePdf({
     title: 'Releve des Classes',
-    subtitle: `Annee scolaire ${schoolYear}`,
+    subtitle: `Annee academique ${schoolYear}`,
     settings,
     columns: [
       { header: 'No',             dataKey: 'no',         halign: 'center', width: 1 },
       { header: 'Classe',         dataKey: 'nom',        halign: 'left',   width: 2.5 },
       { header: 'Niveau',         dataKey: 'niveau',     halign: 'center', width: 2 },
       { header: 'Grade',          dataKey: 'grade',      halign: 'center', width: 1.5 },
-      { header: 'Prof. Principal', dataKey: 'enseignant', halign: 'left',  width: 3.5 },
+      { header: 'Responsable',     dataKey: 'enseignant', halign: 'left',  width: 3.5 },
       { header: 'Effectif',       dataKey: 'effectif',   halign: 'center', width: 1.5 },
       { header: 'Frais/mois',     dataKey: 'frais',      halign: 'right',  width: 2.5 },
       { header: 'Total attendu',  dataKey: 'attendu',    halign: 'right',  width: 3 },
@@ -1054,7 +1054,7 @@ export function generateFinancialSummary(
   // 1. Situation globale
   comments.push({
     icon: balance >= 0 ? 'success' : 'danger',
-    text: `Bilan global : Recettes de ${formatCurrency(totalIncome)} contre des sorties totales de ${formatCurrency(totalSorties)} (depenses : ${formatCurrency(totalExpenses)} + salaires : ${formatCurrency(totalSalaries)}). Solde net : ${formatCurrency(balance)}. ${balance >= 0 ? 'L\'ecole degage un excedent.' : 'L\'ecole est en deficit. Des mesures correctives urgentes sont recommandees.'}`,
+    text: `Bilan global : Recettes de ${formatCurrency(totalIncome)} contre des sorties totales de ${formatCurrency(totalSorties)} (depenses : ${formatCurrency(totalExpenses)} + salaires : ${formatCurrency(totalSalaries)}). Solde net : ${formatCurrency(balance)}. ${balance >= 0 ? 'L\'institut degage un excedent.' : 'L\'institut est en deficit. Des mesures correctives urgentes sont recommandees.'}`,
   });
 
   // 2. Repartition des sorties
@@ -1073,7 +1073,7 @@ export function generateFinancialSummary(
     const moisCouverts = masseSalarialeMensuelle > 0 ? Math.floor(totalSalaries / masseSalarialeMensuelle) : 0;
     comments.push({
       icon: moisCouverts >= sortedMonths.length ? 'success' : 'warning',
-      text: `Masse salariale mensuelle theorique : ${formatCurrency(masseSalarialeMensuelle)} (${teachers.length} prof. + ${staff.length} pers.). Salaires verses couvrent ${moisCouverts} mois sur ${sortedMonths.length} mois d'activite${moisCouverts < sortedMonths.length ? '. Des arrieres de salaire existent.' : '. Tous les salaires sont a jour.'}`,
+      text: `Masse salariale mensuelle theorique : ${formatCurrency(masseSalarialeMensuelle)} (${teachers.length} ens. + ${staff.length} pers.). Salaires verses couvrent ${moisCouverts} mois sur ${sortedMonths.length} mois d'activite${moisCouverts < sortedMonths.length ? '. Des arrieres de salaire existent.' : '. Tous les salaires sont a jour.'}`,
     });
   }
 
@@ -1118,7 +1118,7 @@ export function generateFinancialSummary(
 
   generatePdf({
     title: 'Bilan Financier',
-    subtitle: `Annee scolaire ${schoolYear}`,
+    subtitle: `Annee academique ${schoolYear}`,
     settings,
     columns: [
       { header: 'No',               dataKey: 'no',             halign: 'center', width: 1 },
@@ -1177,7 +1177,7 @@ export function generateOverdueReport(
       mois_retard: String(s.monthsOverdue.length),
       reste: formatCurrency(s.remaining),
       dernier_paie: s.lastPaymentDate ? formatDate(s.lastPaymentDate) : 'Aucun',
-      tuteur: s.student.nom_tuteur,
+      eglise: s.student.eglise_locale,
       telephone: s.student.telephone,
     };
   });
@@ -1187,28 +1187,28 @@ export function generateOverdueReport(
 
   comments.push({
     icon: criticalCount > 0 ? 'danger' : warningCount > 0 ? 'warning' : 'info',
-    text: `${filtered.length} eleve(s) en retard de paiement${filterClasse ? ` dans la classe ${filterClasse}` : ' dans tout l\'etablissement'}. Total des impayes : ${formatCurrency(totalRemaining)}.`,
+    text: `${filtered.length} etudiant(s) en retard de paiement${filterClasse ? ` dans la classe ${filterClasse}` : ' dans tout l\'etablissement'}. Total des impayes : ${formatCurrency(totalRemaining)}.`,
   });
 
   if (criticalCount > 0) {
     const criticals = filtered.filter(s => s.severity === 'critical');
     comments.push({
       icon: 'danger',
-      text: `${criticalCount} eleve(s) en situation CRITIQUE (3 mois et plus de retard) : ${criticals.slice(0, 5).map(s => `${s.student.prenom} ${s.student.nom} (${s.monthsOverdue.length} mois)`).join(', ')}${criticalCount > 5 ? '...' : ''}. Intervention immediate recommandee.`,
+      text: `${criticalCount} etudiant(s) en situation CRITIQUE (3 mois et plus de retard) : ${criticals.slice(0, 5).map(s => `${s.student.prenom} ${s.student.nom} (${s.monthsOverdue.length} mois)`).join(', ')}${criticalCount > 5 ? '...' : ''}. Intervention immediate recommandee.`,
     });
   }
 
   if (warningCount > 0) {
     comments.push({
       icon: 'warning',
-      text: `${warningCount} eleve(s) en ALERTE (2 mois de retard). Relance a effectuer rapidement pour eviter la situation critique.`,
+      text: `${warningCount} etudiant(s) en ALERTE (2 mois de retard). Relance a effectuer rapidement pour eviter la situation critique.`,
     });
   }
 
   if (moderateCount > 0) {
     comments.push({
       icon: 'info',
-      text: `${moderateCount} eleve(s) avec 1 mois de retard. Rappel a envoyer aux parents concernes.`,
+      text: `${moderateCount} etudiant(s) avec 1 mois de retard. Rappel a envoyer aux concernes.`,
     });
   }
 
@@ -1226,20 +1226,20 @@ export function generateOverdueReport(
     comments.push({ icon: 'info', text: `Repartition par classe : ${classeDetails}.` });
   }
 
-  // Eleves sans aucun paiement
+  // Etudiants sans aucun paiement
   const zeroPaid = filtered.filter(s => s.totalPaid === 0);
   if (zeroPaid.length > 0) {
     comments.push({
       icon: 'danger',
-      text: `${zeroPaid.length} eleve(s) n'ont effectue AUCUN paiement cette annee : ${zeroPaid.slice(0, 5).map(s => `${s.student.prenom} ${s.student.nom}`).join(', ')}${zeroPaid.length > 5 ? '...' : ''}.`,
+      text: `${zeroPaid.length} etudiant(s) n'ont effectue AUCUN paiement cette annee : ${zeroPaid.slice(0, 5).map(s => `${s.student.prenom} ${s.student.nom}`).join(', ')}${zeroPaid.length > 5 ? '...' : ''}.`,
     });
   }
 
   generatePdf({
     title: 'Rapport des Retards de Paiement',
     subtitle: filterClasse
-      ? `Classe : ${filterClasse} - Annee scolaire ${schoolYear}`
-      : `Etablissement - Annee scolaire ${schoolYear}`,
+      ? `Classe : ${filterClasse} - Annee academique ${schoolYear}`
+      : `Etablissement - Annee academique ${schoolYear}`,
     settings,
     columns: [
       { header: 'No',             dataKey: 'no',           halign: 'center', width: 1 },
@@ -1249,21 +1249,21 @@ export function generateOverdueReport(
       { header: 'Mois retard',    dataKey: 'mois_retard',  halign: 'center', width: 1.5 },
       { header: 'Reste a payer',  dataKey: 'reste',        halign: 'right',  width: 3 },
       { header: 'Dernier paie.',  dataKey: 'dernier_paie', halign: 'center', width: 2.5 },
-      { header: 'Tuteur',         dataKey: 'tuteur',       halign: 'left',   width: 3 },
+      { header: 'Eglise',         dataKey: 'eglise',       halign: 'left',   width: 3 },
       { header: 'Telephone',      dataKey: 'telephone',    halign: 'center', width: 2.5 },
     ],
     rows,
     fileName: `Alertes_Paiements_${filterClasse || 'Etablissement'}_${schoolYear.replace('/', '-')}.pdf`,
     orientation: 'landscape',
     summaryRows: [
-      { label: 'Eleves en retard', value: String(filtered.length) },
+      { label: 'Etudiants en retard', value: String(filtered.length) },
       { label: 'Critiques', value: String(criticalCount) },
       { label: 'Total impayes', value: formatCurrency(totalRemaining) },
     ],
     totalRow: {
       no: '', nom: 'TOTAL', classe: '', severite: '',
       mois_retard: '', reste: formatCurrency(totalRemaining),
-      dernier_paie: '', tuteur: String(filtered.length) + ' eleve(s)',
+      dernier_paie: '', eglise: String(filtered.length) + ' etudiant(s)',
       telephone: '',
     },
     comments,
@@ -1285,7 +1285,7 @@ export function generatePaySlipPdf(
   const contentWidth = pw - margin * 2;
 
   const isTeacher = 'matiere' in employee;
-  const employeeRole = isTeacher ? `Professeur - ${(employee as Teacher).matiere}` : (employee as Staff).role;
+  const employeeRole = isTeacher ? `Enseignant - ${(employee as Teacher).matiere}` : (employee as Staff).role;
   const employeeName = `${employee.prenom} ${employee.nom.toUpperCase()}`;
   const payMonth = new Date(salaryPayment.month + '-02').toLocaleString('fr-FR', { month: 'long', year: 'numeric' });
   const payDate = formatDate(salaryPayment.date);
@@ -1337,7 +1337,7 @@ export function generatePaySlipPdf(
   doc.text('BULLETIN DE PAYE', pw - margin, 16, { align: 'right' });
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(8);
-  doc.text(`Annee scolaire ${schoolYear}`, pw - margin, 23, { align: 'right' });
+  doc.text(`Annee academique ${schoolYear}`, pw - margin, 23, { align: 'right' });
   doc.setFontSize(7);
   doc.text(`Ref: ${salaryPayment.id}`, pw - margin, 29, { align: 'right' });
 

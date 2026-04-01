@@ -34,8 +34,8 @@ const TimetableForm = ({
           <option value="">Selectionner une classe</option>
           {state.classes.map((c) => <option key={c.id} value={c.nom}>{c.nom}</option>)}
         </Select>
-        <Select label="Professeur" name="teacher_id" value={formData.teacher_id} onChange={handleChange} required>
-          <option value="">Selectionner un professeur</option>
+        <Select label="Enseignant" name="teacher_id" value={formData.teacher_id} onChange={handleChange} required>
+          <option value="">Selectionner un enseignant</option>
           {state.teachers.map((t) => <option key={t.id} value={t.id}>{t.prenom} {t.nom}</option>)}
         </Select>
       </FormRow>
@@ -65,7 +65,7 @@ const TimetableEntryManager = ({ state, updateState }: { state: AppState; update
         { header: 'Heure', accessor: (t) => `${t.time_start} - ${t.time_end}` },
         { header: 'Matiere', accessor: (t) => t.subject },
         { header: 'Classe', accessor: (t) => t.class_name },
-        { header: 'Professeur', accessor: (t) => getTeacherName(t.teacher_id) },
+        { header: 'Enseignant', accessor: (t) => getTeacherName(t.teacher_id) },
       ]}
       searchFields={['day', 'subject', 'class_name']}
       state={state}
@@ -107,7 +107,7 @@ const TimetableView = ({ state }: { state: AppState }) => {
       <div className="flex space-x-4 items-center">
         <Select value={filterType} onChange={(e) => { setFilterType(e.target.value as 'class' | 'teacher'); setSelectedFilter(''); }} className="max-w-xs">
           <option value="class">Voir par Classe</option>
-          <option value="teacher">Voir par Professeur</option>
+          <option value="teacher">Voir par Enseignant</option>
         </Select>
         <Select value={selectedFilter} onChange={(e) => setSelectedFilter(e.target.value)} className="max-w-xs">
           <option value="">Selectionner...</option>
